@@ -1,0 +1,29 @@
+# Dependencias y compilaciones
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Variables y secretos locales
+.env
+.env.*
+!.env.example
+
+# Logs y archivos temporales
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Editores
+.vscode/
+.idea/
+
+# Herramientas locales
+.codex/
+.agents/

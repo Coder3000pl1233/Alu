@@ -1,0 +1,35 @@
+{
+  "name": "aula-segura",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "budget": "node scripts/check-route-budget.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.0.2",
+    "@tailwindcss/postcss": "latest",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "jsdom": "^29.1.1",
+    "pdfjs-dist": "^6.1.200",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vitest": "^4.1.10"
+  }
+}

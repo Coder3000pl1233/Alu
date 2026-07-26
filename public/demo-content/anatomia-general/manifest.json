@@ -1,0 +1,368 @@
+{
+  "documentId": "anatomia-general",
+  "title": "Bloque 1 · Anatomía",
+  "generatedFor": "DEMO-A82F",
+  "pageCount": 60,
+  "pages": [
+    {
+      "page": 1,
+      "src": "/demo-content/anatomia-general/page-001.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 2,
+      "src": "/demo-content/anatomia-general/page-002.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 3,
+      "src": "/demo-content/anatomia-general/page-003.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 4,
+      "src": "/demo-content/anatomia-general/page-004.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 5,
+      "src": "/demo-content/anatomia-general/page-005.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 6,
+      "src": "/demo-content/anatomia-general/page-006.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 7,
+      "src": "/demo-content/anatomia-general/page-007.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 8,
+      "src": "/demo-content/anatomia-general/page-008.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 9,
+      "src": "/demo-content/anatomia-general/page-009.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 10,
+      "src": "/demo-content/anatomia-general/page-010.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 11,
+      "src": "/demo-content/anatomia-general/page-011.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 12,
+      "src": "/demo-content/anatomia-general/page-012.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 13,
+      "src": "/demo-content/anatomia-general/page-013.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 14,
+      "src": "/demo-content/anatomia-general/page-014.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 15,
+      "src": "/demo-content/anatomia-general/page-015.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 16,
+      "src": "/demo-content/anatomia-general/page-016.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 17,
+      "src": "/demo-content/anatomia-general/page-017.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 18,
+      "src": "/demo-content/anatomia-general/page-018.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 19,
+      "src": "/demo-content/anatomia-general/page-019.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 20,
+      "src": "/demo-content/anatomia-general/page-020.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 21,
+      "src": "/demo-content/anatomia-general/page-021.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 22,
+      "src": "/demo-content/anatomia-general/page-022.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 23,
+      "src": "/demo-content/anatomia-general/page-023.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 24,
+      "src": "/demo-content/anatomia-general/page-024.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 25,
+      "src": "/demo-content/anatomia-general/page-025.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 26,
+      "src": "/demo-content/anatomia-general/page-026.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 27,
+      "src": "/demo-content/anatomia-general/page-027.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 28,
+      "src": "/demo-content/anatomia-general/page-028.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 29,
+      "src": "/demo-content/anatomia-general/page-029.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 30,
+      "src": "/demo-content/anatomia-general/page-030.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 31,
+      "src": "/demo-content/anatomia-general/page-031.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 32,
+      "src": "/demo-content/anatomia-general/page-032.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 33,
+      "src": "/demo-content/anatomia-general/page-033.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 34,
+      "src": "/demo-content/anatomia-general/page-034.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 35,
+      "src": "/demo-content/anatomia-general/page-035.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 36,
+      "src": "/demo-content/anatomia-general/page-036.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 37,
+      "src": "/demo-content/anatomia-general/page-037.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 38,
+      "src": "/demo-content/anatomia-general/page-038.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 39,
+      "src": "/demo-content/anatomia-general/page-039.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 40,
+      "src": "/demo-content/anatomia-general/page-040.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 41,
+      "src": "/demo-content/anatomia-general/page-041.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 42,
+      "src": "/demo-content/anatomia-general/page-042.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 43,
+      "src": "/demo-content/anatomia-general/page-043.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 44,
+      "src": "/demo-content/anatomia-general/page-044.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 45,
+      "src": "/demo-content/anatomia-general/page-045.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 46,
+      "src": "/demo-content/anatomia-general/page-046.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 47,
+      "src": "/demo-content/anatomia-general/page-047.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 48,
+      "src": "/demo-content/anatomia-general/page-048.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 49,
+      "src": "/demo-content/anatomia-general/page-049.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 50,
+      "src": "/demo-content/anatomia-general/page-050.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 51,
+      "src": "/demo-content/anatomia-general/page-051.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 52,
+      "src": "/demo-content/anatomia-general/page-052.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 53,
+      "src": "/demo-content/anatomia-general/page-053.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 54,
+      "src": "/demo-content/anatomia-general/page-054.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 55,
+      "src": "/demo-content/anatomia-general/page-055.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 56,
+      "src": "/demo-content/anatomia-general/page-056.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 57,
+      "src": "/demo-content/anatomia-general/page-057.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 58,
+      "src": "/demo-content/anatomia-general/page-058.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 59,
+      "src": "/demo-content/anatomia-general/page-059.jpg",
+      "width": 864,
+      "height": 1221
+    },
+    {
+      "page": 60,
+      "src": "/demo-content/anatomia-general/page-060.jpg",
+      "width": 864,
+      "height": 1221
+    }
+  ]
+}
