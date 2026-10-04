@@ -50,3 +50,35 @@ export const users = [
   { name: "Sofía Acosta", email: "sofia.a@email.com", until: "19 sep 2026", status: "Activo", device: "Chrome · Android" },
   { name: "Tomás Silva", email: "tomas.s@email.com", until: "18 jul 2026", status: "Vencido", device: "Edge · Windows" }
 ];
+
+export type ListingDetails = {
+  seller: string;
+  initials: string;
+  university: string;
+  degree: string;
+  price: string;
+  rating: number;
+  reviews: number;
+  contactUrl: string;
+};
+
+const listingDetails: Record<string, ListingDetails> = {
+  "anatomia-general": { seller: "Martina López", initials: "ML", university: "UBA", degree: "Medicina", price: "$8.500", rating: 4.9, reviews: 18, contactUrl: "https://wa.me/5491100000000?text=Hola%2C%20vi%20tus%20apuntes%20de%20Anatom%C3%ADa%20general" },
+  "sistema-oseo": { seller: "Tomás Rivas", initials: "TR", university: "UNLP", degree: "Medicina", price: "$6.000", rating: 4.8, reviews: 11, contactUrl: "https://wa.me/5491100000000?text=Hola%2C%20vi%20tu%20gu%C3%ADa%20del%20sistema%20%C3%B3seo" },
+  "simulacro-anatomia": { seller: "Sofía Acosta", initials: "SA", university: "UNC", degree: "Medicina", price: "$4.500", rating: 4.7, reviews: 9, contactUrl: "https://wa.me/5491100000000?text=Hola%2C%20vi%20tu%20simulacro%20de%20Anatom%C3%ADa" },
+  "biologia-celular": { seller: "Julián Pérez", initials: "JP", university: "UNR", degree: "Bioquímica", price: "$7.200", rating: 5, reviews: 23, contactUrl: "https://wa.me/5491100000000?text=Hola%2C%20vi%20tus%20apuntes%20de%20Biolog%C3%ADa%20celular" },
+  "histologia-general": { seller: "Camila Torres", initials: "CT", university: "UBA", degree: "Medicina", price: "$7.800", rating: 4.9, reviews: 14, contactUrl: "https://wa.me/5491100000000?text=Hola%2C%20vi%20tus%20apuntes%20de%20Histolog%C3%ADa" },
+};
+
+export function getListingDetails(material: Material): ListingDetails {
+  return listingDetails[material.id] ?? {
+    seller: "Lucía Fernández",
+    initials: "LF",
+    university: material.subjectId === "biologia" ? "UNLP" : "UBA",
+    degree: material.subjectId === "biologia" ? "Bioquímica" : "Medicina",
+    price: material.type === "Simulacro" ? "$4.000" : "$6.500",
+    rating: 4.8,
+    reviews: 7,
+    contactUrl: `https://wa.me/5491100000000?text=${encodeURIComponent(`Hola, vi tu publicación: ${material.title}`)}`,
+  };
+}

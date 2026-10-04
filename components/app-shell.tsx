@@ -1,60 +1,65 @@
+"use client";
+
 import Link from "next/link";
-import { Accessibility, Bell, BookOpen, FileText, Gauge, Home, Layers3, Search, Settings, ShieldCheck, Users } from "lucide-react";
+import { Bell, BookOpen, FileHeart, Gauge, Home, MessageCircle, Plus, Search, ShieldCheck, Store, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { PortalFooter } from "@/components/portal-footer";
 
 type ShellProps = { children: React.ReactNode; admin?: boolean };
 
+const portalLinks = [
+  { href: "/app", label: "Explorar", icon: Home, exact: true },
+  { href: "/app/materias", label: "Materias", icon: BookOpen },
+  { href: "/app/favoritos", label: "Favoritos", icon: FileHeart },
+  { href: "/app/consultas", label: "Consultas", icon: MessageCircle },
+  { href: "/app/mis-publicaciones", label: "Mis publicaciones", icon: Store },
+];
+
 export function AppShell({ children, admin = false }: ShellProps) {
+  const pathname = usePathname();
+  const isActive = (href: string, exact?: boolean) => exact ? pathname === href || (href === "/app" && pathname.startsWith("/app/resultados")) : pathname.startsWith(href);
+
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <Link className="brand" href={admin ? "/admin" : "/app"}>
-          <span className="brand-mark"><ShieldCheck size={20} /></span>
-          <span>Aula Segura</span>
-        </Link>
-        <div className="side-label">{admin ? "Administración" : "Mi espacio"}</div>
-        <nav className="side-nav">
-          {admin ? (
-            <>
-              <Link className="side-link active" href="/admin"><Gauge size={18} />Resumen</Link>
-              <Link className="side-link" href="/admin#usuarios"><Users size={18} />Estudiantes</Link>
-              <Link className="side-link" href="/admin#documentos"><FileText size={18} />Documentos</Link>
-              <Link className="side-link" href="/admin#seguridad"><ShieldCheck size={18} />Seguridad</Link>
-              <Link className="side-link" href="/admin#configuracion"><Settings size={18} />Configuración</Link>
-            </>
-          ) : (
-            <>
-              <Link className="side-link active" href="/app"><Home size={18} />Inicio</Link>
-              <Link className="side-link" href="/app#biblioteca"><BookOpen size={18} />Biblioteca</Link>
-              <Link className="side-link" href="/app#recientes"><FileText size={18} />Continuar leyendo</Link>
-              <Link className="side-link" href="/app/estados"><Layers3 size={18} />Estados UI</Link>
-              <Link className="side-link" href="/app/componentes"><Settings size={18} />Componentes</Link>
-              <Link className="side-link" href="/app/seguridad"><ShieldCheck size={18} />Seguridad</Link>
-              <Link className="side-link" href="/app/accesibilidad"><Accessibility size={18} />Accesibilidad</Link>
-            </>
-          )}
-        </nav>
-        <div className="side-profile">
-          <span className="avatar">{admin ? "AD" : "LF"}</span>
-          <div>
-            <div style={{fontSize: 13, fontWeight: 700, color: "white"}}>{admin ? "Admin General" : "Lucía Fernández"}</div>
-            <div style={{fontSize: 11, color: "#8191ac", marginTop: 2}}>{admin ? "Administrador" : "Acceso hasta 25 ago"}</div>
+      <header className="portal-navbar">
+        <div className="portal-navbar-inner">
+          <Link className="brand" href={admin ? "/admin" : "/app"}>
+            <span className="brand-mark"><BookOpen size={20}/></span>
+            <span>EntreApuntes</span>
+          </Link>
+
+          <nav className="portal-nav-links" aria-label="Navegación principal">
+            {admin ? (
+              <>
+                <Link className="portal-nav-link active" href="/admin"><Gauge size={16}/>Resumen</Link>
+                <Link className="portal-nav-link" href="/admin#usuarios"><Users size={16}/>Usuarios</Link>
+                <Link className="portal-nav-link" href="/admin#documentos"><BookOpen size={16}/>Publicaciones</Link>
+                <Link className="portal-nav-link" href="/admin#seguridad"><ShieldCheck size={16}/>Moderación</Link>
+              </>
+            ) : portalLinks.map(item => {
+              const Icon = item.icon;
+              return <Link key={item.href} className={`portal-nav-link ${isActive(item.href, item.exact) ? "active" : ""}`} href={item.href}><Icon size={16}/>{item.label}</Link>;
+            })}
+          </nav>
+
+          <div className="portal-navbar-actions">
+            <form action={admin ? "/admin" : "/app/resultados"} className="navbar-search"><Search size={16}/><input name="q" aria-label="Buscar" placeholder={admin ? "Buscar" : "Buscar apuntes"}/></form>
+            <button aria-label="Notificaciones" className="navbar-icon-button"><Bell size={18}/></button>
+            {admin ? <Link href="/app" className="btn btn-secondary">Ver portal</Link> : <Link href="/app/publicar" className="btn btn-primary navbar-publish"><Plus size={16}/>Publicar</Link>}
+            <button className="navbar-profile" aria-label="Abrir perfil"><span className="avatar">{admin ? "AD" : "LF"}</span><span>{admin ? "Admin" : "Lucía"}</span></button>
           </div>
         </div>
-      </aside>
-      <main className="main">
-        <header className="topbar">
-          <div className="search"><Search size={17} /><input aria-label="Buscar" placeholder={admin ? "Buscar estudiantes o documentos" : "Buscar en tu biblioteca"} /></div>
-          <div style={{display:"flex", alignItems:"center", gap:14}}>
-            <button aria-label="Notificaciones" className="btn btn-secondary" style={{padding:9}}><Bell size={17} /></button>
-            <Link href={admin ? "/app" : "/admin"} className="btn btn-secondary">{admin ? "Vista estudiante" : "Administrar"}</Link>
-          </div>
-        </header>
-        {children}
-      </main>
+      </header>
+
+      <main className="main">{children}</main>
+      <PortalFooter />
+
       <nav className="mobile-nav">
-        <Link href={admin ? "/admin" : "/app"}><Home size={19} />Inicio</Link>
-        <Link href={admin ? "/admin#usuarios" : "/app#biblioteca"}><BookOpen size={19} />Contenido</Link>
-        <Link href={admin ? "/app" : "/admin"}><Settings size={19} />Cuenta</Link>
+        <Link href="/app"><Home size={19}/>Inicio</Link>
+        <Link href="/app/materias"><BookOpen size={19}/>Materias</Link>
+        <Link href="/app/favoritos"><FileHeart size={19}/>Favoritos</Link>
+        <Link href="/app/consultas"><MessageCircle size={19}/>Consultas</Link>
+        <Link href="/app/mis-publicaciones"><Store size={19}/>Publicaciones</Link>
       </nav>
     </div>
   );

@@ -24,7 +24,7 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
   return (
     <AppShell>
       <div className="page">
-        <Link className="back-link" href="/app#biblioteca"><ArrowLeft size={16} />Todas las materias</Link>
+        <Link className="back-link" href="/app#materias"><ArrowLeft size={16} />Todas las materias</Link>
         <section className="subject-hero" style={{ background: subject.color }}>
           <div className="subject-hero-icon"><BookOpen size={28} /></div>
           <div>
@@ -35,8 +35,8 @@ export default async function SubjectPage({ params }: { params: Promise<{ id: st
         </section>
         <div className="section-head">
           <div>
-            <h2>Materiales de estudio</h2>
-            <div className="muted" style={{ fontSize: 13, marginTop: 5 }}>{subjectMaterials.length} materiales disponibles</div>
+            <h2>Apuntes publicados</h2>
+            <div className="muted" style={{ fontSize: 13, marginTop: 5 }}>{subjectMaterials.length} publicaciones disponibles</div>
           </div>
         </div>
         <SubjectMaterials materials={subjectMaterials} />

@@ -19,6 +19,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 *.tmp
+*.tsbuildinfo
 
 # Editores
 .vscode/

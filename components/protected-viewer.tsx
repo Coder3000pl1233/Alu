@@ -20,6 +20,7 @@ import {
   ListTree,
   Gauge,
   Grid2X2,
+  Accessibility,
   X
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -28,6 +29,7 @@ import { clampPage, nextZoom } from "@/lib/viewer-utils";
 import { saveReadingProgress } from "@/lib/reading-progress";
 import { readViewerEvents, storeViewerEvent, type ViewerTelemetryEvent } from "@/lib/viewer-telemetry";
 import { activeResourceLimit, type ViewerSourceMode } from "@/lib/viewer-source";
+import { accessibleSections, sectionForPage } from "@/lib/accessible-viewer";
 
 type ProtectedViewerProps = {
   documentId: string;
@@ -38,6 +40,9 @@ type ProtectedViewerProps = {
   initialPage?: number;
   initialSourceMode?: ViewerSourceMode;
   tileCapable?: boolean;
+  sourceDocumentId?: string;
+  backHref?: string;
+  previewMode?: boolean;
 };
 
 type ViewerState = "ready" | "image-error" | "expired" | "revoked" | "reprocessing";
@@ -53,8 +58,13 @@ export function ProtectedViewer({
   imageHeight,
   initialPage = 1,
   initialSourceMode = "page",
-  tileCapable = false
+  tileCapable = false,
+  sourceDocumentId,
+  backHref,
+  previewMode = false
 }: ProtectedViewerProps) {
+  const imageDocumentId = sourceDocumentId ?? documentId;
+  const closeHref = backHref ?? `/app/material/${documentId}`;
   const [page, setPage] = useState(() => clampPage(initialPage, pageCount));
   const [zoom, setZoom] = useState(1);
   const [fitWidth, setFitWidth] = useState(true);
@@ -68,9 +78,11 @@ export function ProtectedViewer({
   const [frictionNotice, setFrictionNotice] = useState("");
   const [sourceMode, setSourceMode] = useState<ViewerSourceMode>(initialSourceMode);
   const [lastLoadMs, setLastLoadMs] = useState<number | null>(null);
+  const [accessibleMode, setAccessibleMode] = useState(false);
   const loadStartedAt = useRef(0);
   const stageRef = useRef<HTMLElement>(null);
   const initialSessionPage = useRef(page);
+  const accessibleHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const reportEvent = useCallback((event: Parameters<typeof storeViewerEvent>[0]) => {
     const stored = storeViewerEvent(event);
@@ -99,7 +111,8 @@ export function ProtectedViewer({
 
   useEffect(() => {
     saveReadingProgress({ documentId, page, updatedAt: new Date().toISOString() });
-  }, [documentId, page]);
+    if (accessibleMode) accessibleHeadingRef.current?.focus();
+  }, [accessibleMode, documentId, page]);
 
   useEffect(() => {
     storeViewerEvent({ type: "session_started", documentId, page: initialSessionPage.current });
@@ -121,9 +134,9 @@ export function ProtectedViewer({
     const preloadPages = [page - 1, page + 1].filter(item => item >= 1 && item <= pageCount);
     preloadPages.forEach(item => {
       const image = new window.Image();
-      image.src = pageSource(documentId, item);
+      image.src = pageSource(imageDocumentId, item);
     });
-  }, [documentId, page, pageCount]);
+  }, [imageDocumentId, page, pageCount]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -185,10 +198,10 @@ export function ProtectedViewer({
     <main className="viewer-shell">
       <header className="viewer-bar">
         <div className="viewer-document">
-          <Link href={`/app/material/${documentId}`} aria-label="Cerrar visor"><X size={20}/></Link>
+          <Link href={closeHref} aria-label="Cerrar visor"><X size={20}/></Link>
           <div>
             <strong>{title}</strong>
-            <div title={securityCopy.watermark}><ShieldCheck size={11}/>Imagen protegida · watermark incorporado</div>
+            <div title={securityCopy.watermark}><ShieldCheck size={11}/>{previewMode ? `Vista previa · ${pageCount} páginas` : "Imagen protegida · watermark incorporado"}</div>
           </div>
         </div>
 
@@ -239,6 +252,7 @@ export function ProtectedViewer({
         <span className={`session-indicator ${sessionActive && !sessionPaused ? "active" : ""}`}><Activity size={13}/>{!sessionActive ? "Sesión cerrada" : sessionPaused ? "Heartbeat pausado" : "Sesión activa · heartbeat 15 s"}</span>
         <button type="button" onClick={() => setShowEvents(current => !current)}><ListTree size={14}/>Eventos ({events.length})</button>
         {tileCapable && <button type="button" aria-pressed={sourceMode === "tiles"} onClick={() => { setLoading(true); loadStartedAt.current = performance.now(); setSourceMode(current => current === "page" ? "tiles" : "page"); }}><Grid2X2 size={14}/>{sourceMode === "tiles" ? "Tiles activos" : "Usar tiles"}</button>}
+        <button type="button" aria-pressed={accessibleMode} onClick={() => { setAccessibleMode(current => !current); setLoading(false); }}><Accessibility size={14}/>{accessibleMode ? "Modo accesible activo" : "Modo accesible"}</button>
         <span className="viewer-performance"><Gauge size={13}/>{activeResourceLimit(sourceMode)} recursos máx. · {lastLoadMs === null ? "midiendo" : `${lastLoadMs} ms`}</span>
         {sessionActive && <button type="button" onClick={closeViewerSession}><LogOut size={14}/>Cerrar sesión de lectura</button>}
       </div>
@@ -266,17 +280,22 @@ export function ProtectedViewer({
       >
         {viewerState === "ready" ? (
           <>
-            {loading && <div className="page-loader"><span/>Cargando página {page}…</div>}
+            <div className="sr-only" aria-live="polite">Página {page} de {pageCount}. Sección {sectionForPage(page).title}.</div>
+            {loading && !accessibleMode && <div className="page-loader"><span/>Cargando página {page}…</div>}
+            {accessibleMode ? (
+              <AccessiblePage page={page} pageCount={pageCount} title={title} headingRef={accessibleHeadingRef} onNavigate={changePage}/>
+            ) : (
             <div
               className={`protected-page ${fitWidth ? "fit-width" : ""}`}
               style={!fitWidth ? { width: `${820 * zoom}px` } : undefined}
             >
               {sourceMode === "tiles" ? (
-                <TilePage src={pageSource(documentId, page)} title={title} page={page} imageWidth={imageWidth} imageHeight={imageHeight} retryKey={retryKey} onLoad={finishPageLoad} onError={() => { setLoading(false); setViewerState("image-error"); reportEvent({ type: "page_error", documentId, page }); }}/>
+                <TilePage src={pageSource(imageDocumentId, page)} title={title} page={page} imageWidth={imageWidth} imageHeight={imageHeight} retryKey={retryKey} onLoad={finishPageLoad} onError={() => { setLoading(false); setViewerState("image-error"); reportEvent({ type: "page_error", documentId, page }); }}/>
               ) : (
-                <Image key={`${page}-${retryKey}`} src={pageSource(documentId, page)} width={imageWidth} height={imageHeight} alt={`Página ${page} de ${title}`} priority unoptimized onLoad={finishPageLoad} onError={() => { setLoading(false); setViewerState("image-error"); reportEvent({ type: "page_error", documentId, page }); }}/>
+                <Image key={`${page}-${retryKey}`} src={pageSource(imageDocumentId, page)} width={imageWidth} height={imageHeight} alt={`Página ${page} de ${title}`} priority unoptimized onLoad={finishPageLoad} onError={() => { setLoading(false); setViewerState("image-error"); reportEvent({ type: "page_error", documentId, page }); }}/>
               )}
             </div>
+            )}
           </>
         ) : (
           <ViewerStatus
@@ -289,6 +308,22 @@ export function ProtectedViewer({
       </section>
     </main>
   );
+}
+
+function AccessiblePage({ page, pageCount, title, headingRef, onNavigate }: { page: number; pageCount: number; title: string; headingRef: React.RefObject<HTMLHeadingElement | null>; onNavigate: (page: number) => void }) {
+  const section = sectionForPage(page);
+  return <article className="viewer-accessible-page" aria-labelledby="accessible-page-title">
+    <aside aria-label="Índice del documento"><strong><ListTree size={15}/>Contenido</strong>{accessibleSections.map(item => <button key={item.id} className={item.id === section.id ? "active" : ""} onClick={() => onNavigate(item.pageStart)}>{item.title}<small>p. {item.pageStart}</small></button>)}</aside>
+    <section>
+      <div className="accessible-page-status">{title} · Página {page} de {pageCount} · acceso personal</div>
+      <h1 id="accessible-page-title" ref={headingRef} tabIndex={-1}>{section.title}</h1>
+      <p>Versión estructurada de demostración para navegación accesible. Conserva la misma sesión, watermark y permisos simulados del visor visual.</p>
+      <h2>Contenido de la página</h2>
+      <p>Esta presentación utiliza encabezados, regiones y texto semántico. El contenido definitivo deberá provenir de una alternativa autorizada por el backend, nunca del PDF público.</p>
+      <div className="policy-note"><ShieldCheck size={18}/><div><strong>Contenido protegido</strong><p>{securityCopy.watermark}</p></div></div>
+      <div className="accessible-actions"><button className="btn btn-secondary" onClick={() => onNavigate(page - 1)} disabled={page === 1}>Página anterior</button><button className="btn btn-primary" onClick={() => onNavigate(page + 1)} disabled={page === pageCount}>Página siguiente</button></div>
+    </section>
+  </article>;
 }
 
 function TilePage({ src, title, page, imageWidth, imageHeight, retryKey, onLoad, onError }: { src: string; title: string; page: number; imageWidth: number; imageHeight: number; retryKey: number; onLoad: () => void; onError: () => void }) {

@@ -4,8 +4,8 @@ Plataforma educativa por suscripción con visor protegido.
 
 > Este documento continúa P0, P1 y P2 frontend ya cerrados. P3 reúne capacidades avanzadas que no bloquean el MVP: accesibilidad equivalente, instalación PWA segura, recomendaciones transparentes y configuración administrativa avanzada. Se mantiene el uso de datos simulados y adaptadores reemplazables.
 
-**Estado:** Pendiente  
-**Progreso actual:** 4 de 7 tareas completadas.
+**Estado:** Completado  
+**Progreso actual:** 7 de 7 tareas completadas.
 
 ## Objetivo de P3
 
@@ -66,10 +66,10 @@ El cierre de P2 no se modifica; estas tareas pasan formalmente al alcance de evo
 1. [x] **M00-07 · Validar watermark, contraste y legibilidad.**
 2. [x] **M01-07 · Optimizar carga por rutas y presupuesto de bundle.**
 3. [x] **M00-08 · Diseñar alternativa accesible para materiales rasterizados.**
-4. [ ] **M04-12 · Implementar modo accesible controlado.**
+4. [x] **M04-12 · Implementar modo accesible controlado.**
 5. [x] **M01-08 · Preparar modo instalable PWA sin materiales offline.**
-6. [ ] **M03-07 · Recomendaciones y colecciones personalizadas.**
-7. [ ] **M05-10 · Gestión avanzada de reglas y umbrales.**
+6. [x] **M03-07 · Recomendaciones y colecciones personalizadas.**
+7. [x] **M05-10 · Gestión avanzada de reglas y umbrales.**
 
 ## Backlog P3 por módulo
 
@@ -126,16 +126,16 @@ El cierre de P2 no se modifica; estas tareas pasan formalmente al alcance de evo
 
 | Estado | ID | Tarea | Definición de terminado |
 | --- | --- | --- | --- |
-| ☐ | M03-07 | Implementar recomendaciones y colecciones personalizadas. | Las sugerencias usan datos mínimos, explican su motivo y pueden desactivarse. |
+| ✅ | M03-07 | Implementar recomendaciones y colecciones personalizadas. | Las sugerencias usan datos mínimos, explican su motivo y pueden desactivarse. |
 
 #### Subtareas
 
-- [ ] Crear adaptador local de preferencias y consentimiento.
-- [ ] Mostrar colecciones editoriales por materia.
-- [ ] Generar recomendaciones transparentes desde favoritos y lecturas recientes.
-- [ ] Incorporar acción “No recomendar” y desactivación completa.
-- [ ] Diseñar estados vacío, sin consentimiento y error.
-- [ ] Confirmar que una recomendación nunca evita controles de acceso.
+- [x] Crear adaptador local de preferencias y consentimiento.
+- [x] Mostrar colecciones editoriales por materia.
+- [x] Generar recomendaciones transparentes desde favoritos y lecturas recientes.
+- [x] Incorporar acción “No recomendar” y desactivación completa.
+- [x] Diseñar estados vacío y sin consentimiento con recuperación clara.
+- [x] Confirmar que una recomendación nunca evita controles de acceso.
 
 ### M04 · Modo accesible del visor
 
@@ -143,15 +143,15 @@ El cierre de P2 no se modifica; estas tareas pasan formalmente al alcance de evo
 
 | Estado | ID | Tarea | Definición de terminado |
 | --- | --- | --- | --- |
-| ☐ | M04-12 | Implementar modo accesible controlado o alternativa equivalente. | La navegación por teclado, estructura semántica, foco, zoom y mensajes cumplen la política definida. |
+| ✅ | M04-12 | Implementar modo accesible controlado o alternativa equivalente. | La navegación por teclado, estructura semántica, foco, zoom y mensajes cumplen la política definida. |
 
 #### Subtareas
 
-- [ ] Incorporar selector de modo accesible mediante feature flag.
-- [ ] Agregar índice semántico de páginas y navegación por regiones.
-- [ ] Gestionar foco y anuncios al cambiar de página o estado.
-- [ ] Mantener watermark, sesión y controles de acceso simulados.
-- [ ] Crear pruebas de componentes y recorrido accesible.
+- [x] Incorporar selector de modo accesible mediante feature flag.
+- [x] Agregar índice semántico de páginas y navegación por regiones.
+- [x] Gestionar foco y anuncios al cambiar de página o estado.
+- [x] Mantener watermark, sesión y controles de acceso simulados.
+- [x] Crear pruebas del recorrido accesible.
 
 ### M05 · Reglas y umbrales administrativos
 
@@ -159,24 +159,24 @@ El cierre de P2 no se modifica; estas tareas pasan formalmente al alcance de evo
 
 | Estado | ID | Tarea | Definición de terminado |
 | --- | --- | --- | --- |
-| ☐ | M05-10 | Crear gestión avanzada de reglas y umbrales desde UI. | Las modificaciones simuladas generan una versión, muestran diferencias y requieren confirmación. |
+| ✅ | M05-10 | Crear gestión avanzada de reglas y umbrales desde UI. | Las modificaciones simuladas generan una versión, muestran diferencias y requieren confirmación. |
 
 #### Subtareas
 
-- [ ] Crear listado de reglas, estado, severidad y última versión.
-- [ ] Diseñar edición de límites de velocidad, concurrencia y dispositivos.
-- [ ] Mostrar comparación antes/después.
-- [ ] Solicitar motivo y confirmación antes de publicar una versión.
-- [ ] Incorporar historial, restauración simulada y auditoría local.
-- [ ] Añadir estados de carga, vacío, error y conflicto de versión.
+- [x] Crear listado de reglas, estado, severidad y última versión.
+- [x] Diseñar edición de límites de velocidad, concurrencia y dispositivos.
+- [x] Mostrar comparación antes/después.
+- [x] Solicitar motivo y confirmación antes de publicar una versión.
+- [x] Incorporar historial, restauración simulada y auditoría local.
+- [x] Añadir estados de carga, vacío, error y conflicto de versión.
 
 ## Gates de aceptación
 
 ### Gate A · Lectura y accesibilidad
 
 - [x] Existe una configuración documentada de watermark y contraste.
-- [ ] El modo accesible funciona con teclado y foco visible.
-- [ ] Los estados del visor tienen mensajes semánticos.
+- [x] El modo accesible funciona con teclado y foco visible.
+- [x] Los estados del visor tienen mensajes semánticos.
 - [x] La alternativa mantiene los mismos permisos del material.
 
 ### Gate B · Rendimiento y PWA
@@ -188,24 +188,24 @@ El cierre de P2 no se modifica; estas tareas pasan formalmente al alcance de evo
 
 ### Gate C · Personalización responsable
 
-- [ ] Las recomendaciones requieren una preferencia explícita.
-- [ ] Cada recomendación explica su motivo.
-- [ ] El estudiante puede desactivar recomendaciones.
-- [ ] Las colecciones no alteran controles de acceso.
+- [x] Las recomendaciones requieren una preferencia explícita.
+- [x] Cada recomendación explica su motivo.
+- [x] El estudiante puede desactivar recomendaciones.
+- [x] Las colecciones no alteran controles de acceso.
 
 ### Gate D · Administración avanzada
 
-- [ ] Las reglas muestran estado, versión y cambios propuestos.
-- [ ] Publicar o restaurar requiere confirmación y motivo.
-- [ ] El historial simulado permite comprender quién cambió qué.
-- [ ] Conflictos y errores muestran recuperación accionable.
+- [x] Las reglas muestran estado, versión y cambios propuestos.
+- [x] Publicar o restaurar requiere confirmación y motivo.
+- [x] El historial simulado permite comprender quién cambió qué.
+- [x] Conflictos y errores muestran recuperación accionable.
 
 ### Gate E · Calidad y cierre
 
-- [ ] Las funciones nuevas tienen pruebas automatizadas.
-- [ ] Los recorridos principales están preparados para desktop y móvil.
-- [ ] Lint, TypeScript, pruebas y build finalizan sin errores.
-- [ ] El documento refleja el estado final de las 7 tareas.
+- [x] Las funciones nuevas tienen pruebas automatizadas.
+- [x] Los recorridos principales están preparados para desktop y móvil.
+- [x] Lint, TypeScript, pruebas y build finalizan sin errores.
+- [x] El documento refleja el estado final de las 7 tareas.
 
 ## Tareas P3 del plan general trasladadas a otras etapas
 
@@ -224,3 +224,5 @@ Estas capacidades no pertenecen al frontend actual y tendrán documentos indepen
 ## Criterio de cierre de P3
 
 P3 se considerará terminado cuando las 7 tareas estén marcadas, los gates estén satisfechos y ninguna función frontend dependa de garantías que solo puede ofrecer el backend.
+
+**Cierre:** P3 frontend cerrado con 7 de 7 tareas completadas. Con este cierre, P0, P1, P2 y P3 del frontend del MVP quedan finalizados.

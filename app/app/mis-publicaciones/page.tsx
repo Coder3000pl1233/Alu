@@ -1,0 +1,9 @@
+import Link from "next/link";
+import { AppShell } from "@/components/app-shell";
+import { getListingDetails, materials } from "@/lib/mock-data";
+import { Eye, MessageCircle, MoreHorizontal, Plus, Store } from "lucide-react";
+
+export default function MyListingsPage() {
+  const ownListings = materials.slice(0, 3);
+  return <AppShell><div className="page section-page"><div className="page-title-row listings-title"><span className="page-title-icon"><Store size={24}/></span><div><div className="eyebrow">Espacio vendedor</div><h1>Mis publicaciones</h1><p className="muted">Administrá tus apuntes y revisá el interés que generan.</p></div><Link className="btn btn-primary" href="/app/publicar"><Plus size={16}/>Nueva publicación</Link></div><div className="seller-stats"><div className="card"><small>Publicaciones activas</small><strong>3</strong></div><div className="card"><small>Visitas este mes</small><strong>184</strong></div><div className="card"><small>Consultas recibidas</small><strong>12</strong></div></div><section className="card listings-table"><div className="listings-table-head"><strong>Publicación</strong><span>Rendimiento</span><span>Estado</span><span/></div>{ownListings.map((material, index) => { const listing = getListingDetails(material); return <article className="seller-listing-row" key={material.id}><div><span className="listing-mini-cover" style={{background: material.color}}>{material.title.slice(0,1)}</span><span><strong>{material.title}</strong><small>{listing.price} · {material.pages} páginas</small></span></div><span className="listing-performance"><small><Eye size={13}/>{68 - index * 13} visitas</small><small><MessageCircle size={13}/>{5 - index} consultas</small></span><span className={`status ${index === 2 ? "amber" : "green"}`}>{index === 2 ? "En revisión" : "Activa"}</span><button aria-label={`Opciones de ${material.title}`}><MoreHorizontal size={19}/></button></article>; })}</section></div></AppShell>;
+}

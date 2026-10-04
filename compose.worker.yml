@@ -1,0 +1,18 @@
+services:
+  rasterizer:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile.sandbox
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 64
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid,nodev
+    volumes:
+      - ./sandbox/input:/input:ro
+      - ./sandbox/output:/output:rw

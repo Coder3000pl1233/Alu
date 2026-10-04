@@ -19,6 +19,7 @@ import dynamic from "next/dynamic";
 
 const AdminMetrics = dynamic(() => import("@/components/admin-metrics").then(module => module.AdminMetrics), { loading: () => <div className="card lazy-panel">Cargando métricas…</div> });
 const AdminSecurityCenter = dynamic(() => import("@/components/admin-security-center").then(module => module.AdminSecurityCenter), { loading: () => <div className="card lazy-panel">Cargando seguridad…</div> });
+const AdminRuleManager = dynamic(() => import("@/components/admin-rule-manager").then(module => module.AdminRuleManager), { loading: () => <div className="card lazy-panel">Cargando reglas…</div> });
 
 type StudentStatus = "Activo" | "Por vencer" | "Vencido" | "Suspendido";
 type Student = {
@@ -236,6 +237,7 @@ export function AdminDashboard() {
       </div>
 
       <AdminMetrics/>
+      <AdminRuleManager/>
       <AdminSecurityCenter/>
 
       {createOpen && (

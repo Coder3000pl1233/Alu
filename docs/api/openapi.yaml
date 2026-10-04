@@ -1,0 +1,944 @@
+openapi: 3.1.0
+info:
+  title: Aula Segura API
+  version: 0.1.0
+  summary: Contrato P0 para la plataforma educativa.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: |
+    API privada para autenticación, catálogo por materias, visor protegido y
+    administración. Todas las fechas se expresan en ISO 8601 y UTC.
+servers:
+  - url: /api/v1
+    description: Servidor correspondiente al ambiente actual
+tags:
+  - name: Authentication
+    description: Inicio, consulta y cierre de sesiones y cambio de contraseña.
+  - name: Catalog
+    description: Materias y materiales publicados disponibles para el estudiante.
+  - name: Viewer
+    description: Sesiones de lectura y entrega de páginas protegidas.
+  - name: Admin users
+    description: Operaciones administrativas de cuentas y vigencia de acceso.
+  - name: Admin documents
+    description: Carga privada y seguimiento de procesamiento de documentos.
+
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Iniciar sesión
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              student:
+                value: { email: lucia.f@email.com, password: Aula-Segura-2026, remember_me: false, device_id: 60e746de-1887-49a1-91ea-b0768f8b1208, device_name: Chrome en Windows }
+      responses:
+        '200':
+          description: Sesión creada. También envía la cookie de sesión segura.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+              example: __Host-aula_session=opaque; Path=/; Secure; HttpOnly; SameSite=Lax
+            X-Request-Id:
+              $ref: '#/components/headers/RequestId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionEnvelope'
+        '401':
+          $ref: '#/components/responses/InvalidCredentials'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Cerrar la sesión actual
+      operationId: logout
+      responses:
+        '204': { description: Sesión revocada y cookie eliminada. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+
+  /auth/session:
+    get:
+      tags: [Authentication]
+      summary: Obtener la sesión y el estado de acceso actuales
+      operationId: getCurrentSession
+      responses:
+        '200':
+          description: Sesión válida.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionEnvelope' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+
+  /auth/password:
+    post:
+      tags: [Authentication]
+      summary: Cambiar la contraseña actual
+      operationId: changePassword
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204': { description: Contraseña cambiada y demás sesiones revocadas. }
+        '400': { $ref: '#/components/responses/BusinessRuleError' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '409': { $ref: '#/components/responses/IdempotencyConflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /subjects:
+    get:
+      tags: [Catalog]
+      summary: Listar materias disponibles
+      operationId: listSubjects
+      responses:
+        '200':
+          description: Materias autorizadas para la cuenta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Subject' }
+              example:
+                data:
+                  - { id: anatomia, name: Anatomía, description: 'Estructuras, sistemas y organización del cuerpo humano.', material_count: 6 }
+                  - { id: biologia, name: Biología, description: 'Célula, genética y fundamentos de los seres vivos.', material_count: 6 }
+                  - { id: histologia, name: Histología, description: 'Tejidos, microscopía y organización celular.', material_count: 6 }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+
+  /subjects/{subjectId}/materials:
+    get:
+      tags: [Catalog]
+      summary: Listar materiales de una materia
+      operationId: listSubjectMaterials
+      parameters:
+        - $ref: '#/components/parameters/SubjectId'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/PageSize'
+        - name: query
+          in: query
+          schema: { type: string, maxLength: 100 }
+        - name: type
+          in: query
+          schema: { $ref: '#/components/schemas/MaterialType' }
+      responses:
+        '200':
+          description: Página de materiales publicados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaterialPage'
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /materials/{materialId}:
+    get:
+      tags: [Catalog]
+      summary: Obtener la ficha de un material
+      operationId: getMaterial
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+      responses:
+        '200':
+          description: Material publicado y autorizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Material' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /materials/{materialId}/viewer-sessions:
+    post:
+      tags: [Viewer]
+      summary: Crear una sesión de lectura protegida
+      operationId: createViewerSession
+      parameters:
+        - $ref: '#/components/parameters/MaterialId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preferred_variant:
+                  $ref: '#/components/schemas/PageVariant'
+      responses:
+        '201':
+          description: Sesión ligada a cuenta, sesión web, dispositivo y material.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ViewerSession' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/IdempotencyConflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /viewer-sessions/{viewerSessionId}:
+    delete:
+      tags: [Viewer]
+      summary: Cerrar una sesión de lectura
+      operationId: closeViewerSession
+      parameters:
+        - $ref: '#/components/parameters/ViewerSessionId'
+      responses:
+        '204': { description: Sesión de lectura cerrada. }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /viewer-sessions/{viewerSessionId}/manifest:
+    get:
+      tags: [Viewer]
+      summary: Obtener manifiesto y tokens cortos de páginas cercanas
+      operationId: getViewerManifest
+      parameters:
+        - $ref: '#/components/parameters/ViewerSessionId'
+        - name: around_page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+      responses:
+        '200':
+          description: Metadatos de lectura; nunca contiene una URL del PDF original.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ViewerManifest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/ViewerUnavailable' }
+
+  /viewer-sessions/{viewerSessionId}/pages/{pageNumber}:
+    get:
+      tags: [Viewer]
+      summary: Obtener una página autorizada con watermark incrustado
+      operationId: getViewerPage
+      parameters:
+        - $ref: '#/components/parameters/ViewerSessionId'
+        - name: pageNumber
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: token
+          in: query
+          required: true
+          schema: { type: string, minLength: 32 }
+      responses:
+        '200':
+          description: Imagen protegida; nunca es una variante limpia.
+          headers:
+            Cache-Control:
+              schema: { type: string, const: 'private, no-store' }
+            Cross-Origin-Resource-Policy:
+              schema: { type: string, const: same-origin }
+          content:
+            image/webp:
+              schema: { type: string, format: binary }
+            image/avif:
+              schema: { type: string, format: binary }
+            image/jpeg:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AccessDenied' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/ViewerUnavailable' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /admin/users:
+    get:
+      tags: [Admin users]
+      summary: Listar usuarios
+      operationId: adminListUsers
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/PageSize'
+        - name: query
+          in: query
+          schema: { type: string, maxLength: 100 }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/UserStatus' }
+      responses:
+        '200':
+          description: Página de usuarios.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserPage' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+    post:
+      tags: [Admin users]
+      summary: Crear usuario estudiante
+      operationId: adminCreateUser
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+            example: { name: Lucía Fernández, email: lucia.f@email.com, access_until: '2026-08-25T23:59:59Z' }
+      responses:
+        '201':
+          description: Usuario creado. La contraseña inicial se muestra una sola vez.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CreatedUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /admin/users/{userId}:
+    get:
+      tags: [Admin users]
+      summary: Obtener un usuario
+      operationId: adminGetUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Usuario encontrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AdminUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Admin users]
+      summary: Cambiar estado o datos administrables de un usuario
+      operationId: adminUpdateUser
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200':
+          description: Usuario actualizado y cambio auditado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AdminUser' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/IdempotencyConflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /admin/users/{userId}/access-extensions:
+    post:
+      tags: [Admin users]
+      summary: Extender manualmente la vigencia de acceso
+      operationId: adminExtendUserAccess
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [access_until, reason]
+              properties:
+                access_until: { type: string, format: date-time }
+                reason: { type: string, minLength: 3, maxLength: 500 }
+            example: { access_until: '2026-09-25T23:59:59Z', reason: Renovación manual confirmada }
+      responses:
+        '200':
+          description: Extensión transaccional con before/after auditado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AccessExtension' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/IdempotencyConflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /admin/documents:
+    get:
+      tags: [Admin documents]
+      summary: Listar documentos y su procesamiento
+      operationId: adminListDocuments
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/PageSize'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/DocumentStatus' }
+        - name: subject_id
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Página de documentos.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminDocumentPage' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+    post:
+      tags: [Admin documents]
+      summary: Cargar un PDF privado a cuarentena
+      operationId: adminUploadDocument
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, subject_id, type, file]
+              properties:
+                title: { type: string, minLength: 1, maxLength: 160 }
+                subject_id: { type: string }
+                type: { $ref: '#/components/schemas/MaterialType' }
+                file: { type: string, format: binary }
+      responses:
+        '202':
+          description: Archivo aceptado en cuarentena; todavía no está publicado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AdminDocument' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '409': { $ref: '#/components/responses/IdempotencyConflict' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedMedia' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /admin/documents/{documentId}:
+    get:
+      tags: [Admin documents]
+      summary: Consultar un documento y su procesamiento
+      operationId: adminGetDocument
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Estado actual del documento.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AdminDocument' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Admin documents]
+      summary: Actualizar metadatos o archivar un documento
+      operationId: adminUpdateDocument
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                title: { type: string, minLength: 1, maxLength: 160 }
+                type: { $ref: '#/components/schemas/MaterialType' }
+                archived: { type: boolean }
+      responses:
+        '200':
+          description: Documento actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AdminDocument' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/AdminRequired' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/IdempotencyConflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-aula_session
+
+  headers:
+    RequestId:
+      description: Identificador de correlación de la solicitud.
+      schema: { type: string, format: uuid }
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: UUID único por intención; se conserva al reintentar la misma operación.
+      schema: { type: string, format: uuid }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string, minLength: 1 }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    SubjectId:
+      name: subjectId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-z0-9-]+$' }
+    MaterialId:
+      name: materialId
+      in: path
+      required: true
+      schema: { type: string, pattern: '^[a-z0-9-]+$' }
+    ViewerSessionId:
+      name: viewerSessionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    InvalidCredentials:
+      description: Credenciales inválidas, sin revelar si la cuenta existe.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+          example: { type: 'https://api.example.com/problems/invalid-credentials', title: No pudimos iniciar sesión, status: 401, code: AUTH_INVALID_CREDENTIALS, request_id: 9b191d15-c7f7-4b2a-97a0-190681a74fa8 }
+    Unauthenticated:
+      description: Falta una sesión válida.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    AccessDenied:
+      description: Acceso vencido, suspendido, revocado o sin permiso.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/AccessProblem' }
+          examples:
+            expired:
+              value: { type: 'https://api.example.com/problems/access-expired', title: Tu acceso está vencido, status: 403, code: ACCESS_EXPIRED, request_id: c4afcf04-9f75-41d0-b018-f338c4b22df5 }
+            suspended:
+              value: { type: 'https://api.example.com/problems/account-suspended', title: Tu cuenta está suspendida, status: 403, code: ACCOUNT_SUSPENDED, request_id: a5b77a95-bf83-41ec-b682-f83d3528247a }
+            revoked:
+              value: { type: 'https://api.example.com/problems/session-revoked', title: Esta sesión fue cerrada, status: 403, code: SESSION_REVOKED, request_id: eecbf050-741f-40da-ab31-36f0615f3235 }
+    AdminRequired:
+      description: Se requiere rol administrador.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Recurso inexistente o no visible para la cuenta.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Conflict:
+      description: Conflicto con el estado actual o un recurso existente.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    IdempotencyConflict:
+      description: La clave ya se utilizó con un cuerpo diferente.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    BusinessRuleError:
+      description: La operación incumple una regla de negocio.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    ValidationError:
+      description: Uno o más campos no son válidos.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ValidationProblem' }
+    ViewerUnavailable:
+      description: Documento reprocesándose o sesión de lectura no utilizable.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    RateLimited:
+      description: Límite temporal excedido.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Retry-After:
+          schema: { type: integer, minimum: 1 }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    PayloadTooLarge:
+      description: Archivo por encima del límite configurado.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    UnsupportedMedia:
+      description: Tipo real del archivo no admitido.
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, device_id, device_name]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 1, maxLength: 1024 }
+        remember_me: { type: boolean, default: false }
+        device_id: { type: string, format: uuid }
+        device_name: { type: string, minLength: 1, maxLength: 100 }
+    ChangePasswordRequest:
+      type: object
+      additionalProperties: false
+      required: [current_password, new_password]
+      properties:
+        current_password: { type: string, minLength: 1, maxLength: 1024 }
+        new_password: { type: string, minLength: 12, maxLength: 128 }
+    Role:
+      type: string
+      enum: [student, admin]
+    UserStatus:
+      type: string
+      enum: [active, suspended, revoked]
+    AccessState:
+      type: string
+      enum: [active, expiring, expired, suspended, revoked]
+    ProblemCode:
+      type: string
+      enum:
+        - AUTH_INVALID_CREDENTIALS
+        - AUTH_REQUIRED
+        - SESSION_EXPIRED
+        - SESSION_REVOKED
+        - ACCESS_EXPIRED
+        - ACCOUNT_SUSPENDED
+        - ACCOUNT_REVOKED
+        - ADMIN_REQUIRED
+        - RESOURCE_NOT_FOUND
+        - VALIDATION_FAILED
+        - RATE_LIMITED
+        - IDEMPOTENCY_CONFLICT
+        - RESOURCE_CONFLICT
+        - BUSINESS_RULE_VIOLATION
+        - VIEWER_UNAVAILABLE
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - INTERNAL_ERROR
+    SessionUser:
+      type: object
+      required: [id, name, email, role, status, access_state, access_until, must_change_password]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+        status: { $ref: '#/components/schemas/UserStatus' }
+        access_state: { $ref: '#/components/schemas/AccessState' }
+        access_until: { type: [string, 'null'], format: date-time }
+        must_change_password: { type: boolean }
+    Session:
+      type: object
+      required: [id, user, device_id, created_at, idle_expires_at, absolute_expires_at]
+      properties:
+        id: { type: string, format: uuid, description: Identificador público; no es el secreto de cookie. }
+        user: { $ref: '#/components/schemas/SessionUser' }
+        device_id: { type: string, format: uuid }
+        created_at: { type: string, format: date-time }
+        idle_expires_at: { type: string, format: date-time }
+        absolute_expires_at: { type: string, format: date-time }
+    SessionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data: { $ref: '#/components/schemas/Session' }
+    Subject:
+      type: object
+      required: [id, name, description, material_count]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        material_count: { type: integer, minimum: 0 }
+    MaterialType:
+      type: string
+      enum: [note, guide, book, mock_exam]
+    Material:
+      type: object
+      required: [id, subject_id, title, type, page_count, published_at, updated_at, viewer_available]
+      properties:
+        id: { type: string }
+        subject_id: { type: string }
+        title: { type: string }
+        type: { $ref: '#/components/schemas/MaterialType' }
+        page_count: { type: integer, minimum: 1 }
+        published_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        viewer_available: { type: boolean }
+        reading_progress:
+          oneOf:
+            - { $ref: '#/components/schemas/ReadingProgress' }
+            - { type: 'null' }
+    ReadingProgress:
+      type: object
+      required: [page, percentage, updated_at]
+      properties:
+        page: { type: integer, minimum: 1 }
+        percentage: { type: integer, minimum: 0, maximum: 100 }
+        updated_at: { type: string, format: date-time }
+    PageMeta:
+      type: object
+      required: [page_size, has_more, next_cursor]
+      properties:
+        page_size: { type: integer, minimum: 1 }
+        has_more: { type: boolean }
+        next_cursor: { type: [string, 'null'] }
+    MaterialPage:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Material' }
+        meta: { $ref: '#/components/schemas/PageMeta' }
+    PageVariant:
+      type: string
+      enum: [normal, high]
+      default: normal
+    ViewerSession:
+      type: object
+      required: [id, material_id, page_count, variant, created_at, expires_at, heartbeat_interval_seconds]
+      properties:
+        id: { type: string, format: uuid }
+        material_id: { type: string }
+        page_count: { type: integer, minimum: 1 }
+        variant: { $ref: '#/components/schemas/PageVariant' }
+        created_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        heartbeat_interval_seconds: { type: integer, minimum: 5, example: 15 }
+    ViewerManifest:
+      type: object
+      required: [session, image_width, image_height, pages]
+      properties:
+        session: { $ref: '#/components/schemas/ViewerSession' }
+        image_width: { type: integer, minimum: 1 }
+        image_height: { type: integer, minimum: 1 }
+        pages:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            required: [page, token, expires_at]
+            properties:
+              page: { type: integer, minimum: 1 }
+              token: { type: string }
+              expires_at: { type: string, format: date-time }
+    AdminUser:
+      allOf:
+        - $ref: '#/components/schemas/SessionUser'
+        - type: object
+          required: [created_at, updated_at]
+          properties:
+            last_device_name: { type: [string, 'null'] }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+    CreateUserRequest:
+      type: object
+      additionalProperties: false
+      required: [name, email, access_until]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254 }
+        access_until: { type: string, format: date-time }
+    CreatedUser:
+      type: object
+      required: [user, initial_password]
+      properties:
+        user: { $ref: '#/components/schemas/AdminUser' }
+        initial_password: { type: string, writeOnly: true, description: Se devuelve una sola vez y nunca se persiste en claro. }
+    UpdateUserRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        status: { $ref: '#/components/schemas/UserStatus' }
+        reason: { type: string, minLength: 3, maxLength: 500 }
+    AccessExtension:
+      type: object
+      required: [user_id, before, after, reason, created_at]
+      properties:
+        user_id: { type: string, format: uuid }
+        before: { type: [string, 'null'], format: date-time }
+        after: { type: string, format: date-time }
+        reason: { type: string }
+        created_at: { type: string, format: date-time }
+    UserPage:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AdminUser' }
+        meta: { $ref: '#/components/schemas/PageMeta' }
+    DocumentStatus:
+      type: string
+      enum: [quarantined, queued, processing, ready, failed, rejected, archived]
+    AdminDocument:
+      type: object
+      required: [id, title, subject_id, type, status, processing_progress, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        subject_id: { type: string }
+        type: { $ref: '#/components/schemas/MaterialType' }
+        status: { $ref: '#/components/schemas/DocumentStatus' }
+        processing_progress: { type: integer, minimum: 0, maximum: 100 }
+        page_count: { type: [integer, 'null'], minimum: 1 }
+        safe_failure_code: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    AdminDocumentPage:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AdminDocument' }
+        meta: { $ref: '#/components/schemas/PageMeta' }
+    Problem:
+      type: object
+      required: [type, title, status, code, request_id]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer, minimum: 400, maximum: 599 }
+        code: { $ref: '#/components/schemas/ProblemCode' }
+        request_id: { type: string, format: uuid }
+        retry_after_seconds: { type: integer, minimum: 1 }
+    AccessProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          properties:
+            access_state: { $ref: '#/components/schemas/AccessState' }
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required: [errors]
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                required: [field, code]
+                properties:
+                  field: { type: string }
+                  code: { type: string }
+
+security:
+  - sessionCookie: []

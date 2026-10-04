@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from "vitest";
 import { createViewerEvent } from "@/lib/viewer-telemetry";
 
