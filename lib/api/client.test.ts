@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ApiClientError, createApiClient } from "@/lib/api/client";
+import { createApiClient } from "@/lib/api/client";
 
 describe("typed api client", () => {
   it("envía cookies y interpreta una sesión tipada", async () => {
@@ -19,7 +19,7 @@ describe("typed api client", () => {
     const body = { type: "https://api.aula.test/problems/session-expired", title: "Sesión vencida", status: 401, code: "SESSION_EXPIRED", request_id: "9b191d15-c7f7-4b2a-97a0-190681a74fa8" };
     const client = createApiClient({ fetcher: vi.fn(async () => new Response(JSON.stringify(body), { status: 401 })) as typeof fetch });
 
-    await expect(client.getCurrentSession()).rejects.toMatchObject<ApiClientError>({ status: 401, problem: body });
+    await expect(client.getCurrentSession()).rejects.toMatchObject({ status: 401, problem: body });
   });
 
   it("envía la clave de idempotencia en cambios de contraseña", async () => {

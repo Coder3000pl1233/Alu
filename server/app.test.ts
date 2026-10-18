@@ -9,6 +9,7 @@ const admin = {
   email: "admin@aula.test",
   role: "admin",
   status: "active",
+  emailVerifiedAt: null,
   accessUntil: null,
   passwordHash: "hash",
   mustChangePassword: false,
@@ -64,7 +65,7 @@ describe("M07 API integration", () => {
   });
 
   it("bloquea las rutas administrativas sin rol admin", async () => {
-    const actor = { ...admin, role: "student" as const, accessUntil: new Date("2026-09-01T00:00:00Z") };
+    const actor = { ...admin, role: "student" as const, accessUntil: new Date("2099-01-01T00:00:00Z") };
     const app = buildApi({ identity: identity() as never, sessions: sessions(actor) as never });
     const response = await app.inject({ method: "GET", url: "/api/v1/admin/users" });
     expect(response.statusCode).toBe(403);

@@ -21,6 +21,6 @@ describe("users schema", () => {
 
   it("almacena access_until como timestamp con zona horaria", () => {
     expect(columns.accessUntil.columnType).toBe("PgTimestamp");
-    expect(columns.accessUntil.withTimezone).toBe(true);
+    expect(columns.accessUntil.getSQLType()).toBe("timestamp with time zone");
   });
 });

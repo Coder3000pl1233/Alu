@@ -17,7 +17,7 @@ describe("central authorization", () => {
   });
 
   it("aplica RBAC administrativo", () => {
-    expect(() => requireAdmin(user())).toThrowError(expect.objectContaining({ code: "ADMIN_REQUIRED" }));
+    expect(() => requireAdmin(user({ accessUntil: new Date("2099-01-01T00:00:00Z") }))).toThrowError(expect.objectContaining({ code: "ADMIN_REQUIRED" }));
     expect(() => requireAdmin(user({ role: "admin", accessUntil: null }))).not.toThrow();
   });
 });

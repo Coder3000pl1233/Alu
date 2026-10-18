@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Crear cuenta de vendedor y enviar verificación */
+        post: operations["registerSeller"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -14,7 +31,24 @@ export interface paths {
         get?: never;
         put?: never;
         /** Iniciar sesión */
-        post: operations["login"];
+        post: operations["loginSeller"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Consultar sesión actual */
+        get: operations["getSellerSession"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -30,32 +64,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cerrar la sesión actual */
-        post: operations["logout"];
+        /** Cerrar sesión */
+        post: operations["logoutSeller"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/auth/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener la sesión y el estado de acceso actuales */
-        get: operations["getCurrentSession"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/password": {
+    "/auth/verification/request": {
         parameters: {
             query?: never;
             header?: never;
@@ -64,66 +81,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Cambiar la contraseña actual */
-        post: operations["changePassword"];
+        /** Reenviar enlace de verificación */
+        post: operations["requestEmailVerification"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/subjects": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar materias disponibles */
-        get: operations["listSubjects"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/subjects/{subjectId}/materials": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar materiales de una materia */
-        get: operations["listSubjectMaterials"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/{materialId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener la ficha de un material */
-        get: operations["getMaterial"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/materials/{materialId}/viewer-sessions": {
+    "/auth/verify-email": {
         parameters: {
             query?: never;
             header?: never;
@@ -132,15 +98,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Crear una sesión de lectura protegida */
-        post: operations["createViewerSession"];
+        /** Consumir token de verificación */
+        post: operations["verifySellerEmail"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/viewer-sessions/{viewerSessionId}": {
+    "/auth/password-reset/request": {
         parameters: {
             query?: never;
             header?: never;
@@ -149,85 +115,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
-        /** Cerrar una sesión de lectura */
-        delete: operations["closeViewerSession"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/viewer-sessions/{viewerSessionId}/manifest": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener manifiesto y tokens cortos de páginas cercanas */
-        get: operations["getViewerManifest"];
-        put?: never;
-        post?: never;
+        /** Solicitar recuperación sin revelar si existe el correo */
+        post: operations["requestSellerPasswordReset"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/viewer-sessions/{viewerSessionId}/pages/{pageNumber}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener una página autorizada con watermark incrustado */
-        get: operations["getViewerPage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Listar usuarios */
-        get: operations["adminListUsers"];
-        put?: never;
-        /** Crear usuario estudiante */
-        post: operations["adminCreateUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/users/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Obtener un usuario */
-        get: operations["adminGetUser"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Cambiar estado o datos administrables de un usuario */
-        patch: operations["adminUpdateUser"];
-        trace?: never;
-    };
-    "/admin/users/{userId}/access-extensions": {
+    "/auth/password-reset/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -236,388 +132,272 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Extender manualmente la vigencia de acceso */
-        post: operations["adminExtendUserAccess"];
+        /** Consumir token y establecer contraseña nueva */
+        post: operations["resetSellerPassword"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/admin/documents": {
+    "/listings": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Listar documentos y su procesamiento */
-        get: operations["adminListDocuments"];
-        put?: never;
-        /** Cargar un PDF privado a cuarentena */
-        post: operations["adminUploadDocument"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/documents/{documentId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Consultar un documento y su procesamiento */
-        get: operations["adminGetDocument"];
+        /** Listar publicaciones visibles */
+        get: operations["listPublicListings"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Actualizar metadatos o archivar un documento */
-        patch: operations["adminUpdateDocument"];
+        patch?: never;
+        trace?: never;
+    };
+    "/listings/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener una publicación visible */
+        get: operations["getPublicListing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar mis publicaciones, incluidos borradores */
+        get: operations["listMyListings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/listings/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener una publicación propia */
+        get: operations["getMyListing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/listings/{listingId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obtener una publicación para administración */
+        get: operations["getAdminListing"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        LoginRequest: {
+        EmailInput: {
             /** Format: email */
             email: string;
+        };
+        RegisterInput: components["schemas"]["EmailInput"] & {
+            name: string;
+            /** Format: password */
             password: string;
-            /** @default false */
-            remember_me: boolean;
+        };
+        LoginInput: components["schemas"]["EmailInput"] & {
+            /** Format: password */
+            password: string;
             /** Format: uuid */
             device_id: string;
             device_name: string;
+            remember_me?: boolean;
         };
-        ChangePasswordRequest: {
-            current_password: string;
-            new_password: string;
+        TokenInput: {
+            token: string;
         };
-        /** @enum {string} */
-        Role: "student" | "admin";
-        /** @enum {string} */
-        UserStatus: "active" | "suspended" | "revoked";
-        /** @enum {string} */
-        AccessState: "active" | "expiring" | "expired" | "suspended" | "revoked";
-        /** @enum {string} */
-        ProblemCode: "AUTH_INVALID_CREDENTIALS" | "AUTH_REQUIRED" | "SESSION_EXPIRED" | "SESSION_REVOKED" | "ACCESS_EXPIRED" | "ACCOUNT_SUSPENDED" | "ACCOUNT_REVOKED" | "ADMIN_REQUIRED" | "RESOURCE_NOT_FOUND" | "VALIDATION_FAILED" | "RATE_LIMITED" | "IDEMPOTENCY_CONFLICT" | "RESOURCE_CONFLICT" | "BUSINESS_RULE_VIOLATION" | "VIEWER_UNAVAILABLE" | "PAYLOAD_TOO_LARGE" | "UNSUPPORTED_MEDIA_TYPE" | "INTERNAL_ERROR";
-        SessionUser: {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            /** Format: email */
-            email: string;
-            role: components["schemas"]["Role"];
-            status: components["schemas"]["UserStatus"];
-            access_state: components["schemas"]["AccessState"];
-            /** Format: date-time */
-            access_until: string | null;
-            must_change_password: boolean;
-        };
-        Session: {
-            /**
-             * Format: uuid
-             * @description Identificador público; no es el secreto de cookie.
-             */
-            id: string;
-            user: components["schemas"]["SessionUser"];
-            /** Format: uuid */
-            device_id: string;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            idle_expires_at: string;
-            /** Format: date-time */
-            absolute_expires_at: string;
+        ResetPasswordInput: {
+            token: string;
+            /** Format: password */
+            password: string;
         };
         SessionEnvelope: {
-            data: components["schemas"]["Session"];
-        };
-        Subject: {
-            id: string;
-            name: string;
-            description: string;
-            material_count: number;
-        };
-        /** @enum {string} */
-        MaterialType: "note" | "guide" | "book" | "mock_exam";
-        Material: {
-            id: string;
-            subject_id: string;
-            title: string;
-            type: components["schemas"]["MaterialType"];
-            page_count: number;
-            /** Format: date-time */
-            published_at: string;
-            /** Format: date-time */
-            updated_at: string;
-            viewer_available: boolean;
-            reading_progress?: components["schemas"]["ReadingProgress"] | null;
-        };
-        ReadingProgress: {
-            page: number;
-            percentage: number;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        PageMeta: {
-            page_size: number;
-            has_more: boolean;
-            next_cursor: string | null;
-        };
-        MaterialPage: {
-            data: components["schemas"]["Material"][];
-            meta: components["schemas"]["PageMeta"];
-        };
-        /**
-         * @default normal
-         * @enum {string}
-         */
-        PageVariant: "normal" | "high";
-        ViewerSession: {
-            /** Format: uuid */
-            id: string;
-            material_id: string;
-            page_count: number;
-            variant: components["schemas"]["PageVariant"];
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            expires_at: string;
-            /** @example 15 */
-            heartbeat_interval_seconds: number;
-        };
-        ViewerManifest: {
-            session: components["schemas"]["ViewerSession"];
-            image_width: number;
-            image_height: number;
-            pages: {
-                page: number;
-                token: string;
+            data: {
+                /** Format: uuid */
+                id: string;
+                user: {
+                    /** Format: uuid */
+                    id: string;
+                    name: string;
+                    /** Format: email */
+                    email: string;
+                    /** @enum {string} */
+                    role: "student" | "seller" | "admin";
+                    /** @enum {string} */
+                    status: "active" | "suspended" | "revoked";
+                    email_verified: boolean;
+                    /** @enum {string} */
+                    access_state: "active" | "expired" | "suspended" | "revoked";
+                    /** Format: date-time */
+                    access_until: string | null;
+                    must_change_password: boolean;
+                };
+                /** Format: uuid */
+                device_id: string;
                 /** Format: date-time */
-                expires_at: string;
-            }[];
+                created_at: string;
+                /** Format: date-time */
+                idle_expires_at: string;
+                /** Format: date-time */
+                absolute_expires_at: string;
+            };
         };
-        AdminUser: components["schemas"]["SessionUser"] & {
-            last_device_name?: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-        };
-        CreateUserRequest: {
-            name: string;
-            /** Format: email */
-            email: string;
-            /** Format: date-time */
-            access_until: string;
-        };
-        CreatedUser: {
-            user: components["schemas"]["AdminUser"];
-            /** @description Se devuelve una sola vez y nunca se persiste en claro. */
-            initial_password: string;
-        };
-        UpdateUserRequest: {
-            name?: string;
-            status?: components["schemas"]["UserStatus"];
-            reason?: string;
-        };
-        AccessExtension: {
+        CatalogItem: {
             /** Format: uuid */
-            user_id: string;
-            /** Format: date-time */
-            before: string | null;
-            /** Format: date-time */
-            after: string;
-            reason: string;
-            /** Format: date-time */
-            created_at: string;
+            id: string;
+            name: string;
+            slug: string;
         };
-        UserPage: {
-            data: components["schemas"]["AdminUser"][];
-            meta: components["schemas"]["PageMeta"];
+        SellerSummary: {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         /** @enum {string} */
-        DocumentStatus: "quarantined" | "queued" | "processing" | "ready" | "failed" | "rejected" | "archived";
-        AdminDocument: {
+        ListingType: "note" | "guide" | "mock_exam" | "summary";
+        /** @enum {string} */
+        ListingStatus: "draft" | "pending" | "published" | "rejected" | "paused" | "hidden" | "withdrawn";
+        PublicListing: {
             /** Format: uuid */
             id: string;
             title: string;
-            subject_id: string;
-            type: components["schemas"]["MaterialType"];
-            status: components["schemas"]["DocumentStatus"];
-            processing_progress: number;
-            page_count?: number | null;
-            safe_failure_code?: string | null;
+            description: string | null;
+            type: components["schemas"]["ListingType"] | null;
+            price_ars: number | null;
+            full_page_count: number | null;
+            subject: components["schemas"]["CatalogItem"] | null;
+            university: components["schemas"]["CatalogItem"] | null;
+            seller: components["schemas"]["SellerSummary"];
             /** Format: date-time */
-            created_at: string;
+            published_at: string | null;
             /** Format: date-time */
             updated_at: string;
         };
-        AdminDocumentPage: {
-            data: components["schemas"]["AdminDocument"][];
-            meta: components["schemas"]["PageMeta"];
+        PrivateListing: components["schemas"]["PublicListing"] & {
+            /** Format: uuid */
+            seller_id: string;
+            status: components["schemas"]["ListingStatus"];
+            revision: number;
+            whatsapp_number: string | null;
+            contact_consent: boolean;
+            /** Format: date-time */
+            submitted_at: string | null;
+        };
+        PublicListingPage: {
+            data: components["schemas"]["PublicListing"][];
+        };
+        PublicListingEnvelope: {
+            data: components["schemas"]["PublicListing"];
+        };
+        PrivateListingPage: {
+            data: components["schemas"]["PrivateListing"][];
+        };
+        PrivateListingEnvelope: {
+            data: components["schemas"]["PrivateListing"];
         };
         Problem: {
-            /** Format: uri */
             type: string;
             title: string;
             status: number;
-            code: components["schemas"]["ProblemCode"];
+            code: string;
             /** Format: uuid */
             request_id: string;
-            retry_after_seconds?: number;
-        };
-        AccessProblem: components["schemas"]["Problem"] & {
-            access_state?: components["schemas"]["AccessState"];
-        };
-        ValidationProblem: components["schemas"]["Problem"] & {
-            errors: {
-                field: string;
-                code: string;
-            }[];
         };
     };
     responses: {
-        /** @description Credenciales inválidas, sin revelar si la cuenta existe. */
-        InvalidCredentials: {
+        /** @description Solicitud aceptada sin revelar existencia de la cuenta. */
+        AcceptedMessage: {
             headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
                 [name: string]: unknown;
             };
             content: {
-                /**
-                 * @example {
-                 *       "type": "https://api.example.com/problems/invalid-credentials",
-                 *       "title": "No pudimos iniciar sesión",
-                 *       "status": 401,
-                 *       "code": "AUTH_INVALID_CREDENTIALS",
-                 *       "request_id": "9b191d15-c7f7-4b2a-97a0-190681a74fa8"
-                 *     }
-                 */
-                "application/problem+json": components["schemas"]["Problem"];
+                "application/json": {
+                    message: string;
+                };
             };
         };
-        /** @description Falta una sesión válida. */
-        Unauthenticated: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description Acceso vencido, suspendido, revocado o sin permiso. */
-        AccessDenied: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["AccessProblem"];
-            };
-        };
-        /** @description Se requiere rol administrador. */
-        AdminRequired: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description Recurso inexistente o no visible para la cuenta. */
-        NotFound: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description Conflicto con el estado actual o un recurso existente. */
-        Conflict: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description La clave ya se utilizó con un cuerpo diferente. */
-        IdempotencyConflict: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description La operación incumple una regla de negocio. */
-        BusinessRuleError: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["Problem"];
-            };
-        };
-        /** @description Uno o más campos no son válidos. */
+        /** @description Parámetro inválido. */
         ValidationError: {
             headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                [name: string]: unknown;
-            };
-            content: {
-                "application/problem+json": components["schemas"]["ValidationProblem"];
-            };
-        };
-        /** @description Documento reprocesándose o sesión de lectura no utilizable. */
-        ViewerUnavailable: {
-            headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
                 [name: string]: unknown;
             };
             content: {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Límite temporal excedido. */
-        RateLimited: {
+        /** @description Sesión requerida. */
+        Unauthenticated: {
             headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
-                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Archivo por encima del límite configurado. */
-        PayloadTooLarge: {
+        /** @description Cuenta suspendida o revocada. */
+        AccountUnavailable: {
             headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
                 [name: string]: unknown;
             };
             content: {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Tipo real del archivo no admitido. */
-        UnsupportedMedia: {
+        /** @description Rol administrador requerido. */
+        AdminRequired: {
             headers: {
-                "X-Request-Id": components["headers"]["RequestId"];
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Publicación inexistente o no visible. */
+        NotFound: {
+            headers: {
                 [name: string]: unknown;
             };
             content: {
@@ -626,26 +406,16 @@ export interface components {
         };
     };
     parameters: {
-        /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-        IdempotencyKey: string;
-        Cursor: string;
+        ListingId: string;
         PageSize: number;
-        SubjectId: string;
-        MaterialId: string;
-        ViewerSessionId: string;
-        UserId: string;
-        DocumentId: string;
     };
     requestBodies: never;
-    headers: {
-        /** @description Identificador de correlación de la solicitud. */
-        RequestId: string;
-    };
+    headers: never;
     pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    login: {
+    registerSeller: {
         parameters: {
             query?: never;
             header?: never;
@@ -654,47 +424,41 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginRequest"];
+                "application/json": components["schemas"]["RegisterInput"];
             };
         };
         responses: {
-            /** @description Sesión creada. También envía la cookie de sesión segura. */
+            202: components["responses"]["AcceptedMessage"];
+            400: components["responses"]["ValidationError"];
+        };
+    };
+    loginSeller: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginInput"];
+            };
+        };
+        responses: {
+            /** @description Sesión creada; establece cookie HttpOnly Secure. */
             200: {
                 headers: {
-                    /** @example __Host-aula_session=opaque; Path=/; Secure; HttpOnly; SameSite=Lax */
-                    "Set-Cookie"?: string;
-                    "X-Request-Id": components["headers"]["RequestId"];
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["SessionEnvelope"];
                 };
             };
-            401: components["responses"]["InvalidCredentials"];
-            422: components["responses"]["ValidationError"];
-            429: components["responses"]["RateLimited"];
-        };
-    };
-    logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Sesión revocada y cookie eliminada. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+            400: components["responses"]["ValidationError"];
             401: components["responses"]["Unauthenticated"];
         };
     };
-    getCurrentSession: {
+    getSellerSession: {
         parameters: {
             query?: never;
             header?: never;
@@ -703,7 +467,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Sesión válida. */
+            /** @description Sesión activa. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -715,36 +479,25 @@ export interface operations {
             401: components["responses"]["Unauthenticated"];
         };
     };
-    changePassword: {
+    logoutSeller: {
         parameters: {
             query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChangePasswordRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description Contraseña cambiada y demás sesiones revocadas. */
+            /** @description Sesión revocada. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            400: components["responses"]["BusinessRuleError"];
-            401: components["responses"]["Unauthenticated"];
-            409: components["responses"]["IdempotencyConflict"];
-            422: components["responses"]["ValidationError"];
         };
     };
-    listSubjects: {
+    requestEmailVerification: {
         parameters: {
             query?: never;
             header?: never;
@@ -753,536 +506,198 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Materias autorizadas para la cuenta. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "data": [
-                     *         {
-                     *           "id": "anatomia",
-                     *           "name": "Anatomía",
-                     *           "description": "Estructuras, sistemas y organización del cuerpo humano.",
-                     *           "material_count": 6
-                     *         },
-                     *         {
-                     *           "id": "biologia",
-                     *           "name": "Biología",
-                     *           "description": "Célula, genética y fundamentos de los seres vivos.",
-                     *           "material_count": 6
-                     *         },
-                     *         {
-                     *           "id": "histologia",
-                     *           "name": "Histología",
-                     *           "description": "Tejidos, microscopía y organización celular.",
-                     *           "material_count": 6
-                     *         }
-                     *       ]
-                     *     }
-                     */
-                    "application/json": {
-                        data: components["schemas"]["Subject"][];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AccessDenied"];
-        };
-    };
-    listSubjectMaterials: {
-        parameters: {
-            query?: {
-                cursor?: components["parameters"]["Cursor"];
-                page_size?: components["parameters"]["PageSize"];
-                query?: string;
-                type?: components["schemas"]["MaterialType"];
-            };
-            header?: never;
-            path: {
-                subjectId: components["parameters"]["SubjectId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Página de materiales publicados. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MaterialPage"];
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AccessDenied"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["ValidationError"];
-        };
-    };
-    getMaterial: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                materialId: components["parameters"]["MaterialId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Material publicado y autorizado. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["Material"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AccessDenied"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    createViewerSession: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
-            path: {
-                materialId: components["parameters"]["MaterialId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    preferred_variant?: components["schemas"]["PageVariant"];
-                };
-            };
-        };
-        responses: {
-            /** @description Sesión ligada a cuenta, sesión web, dispositivo y material. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["ViewerSession"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AccessDenied"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["IdempotencyConflict"];
-            429: components["responses"]["RateLimited"];
-        };
-    };
-    closeViewerSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                viewerSessionId: components["parameters"]["ViewerSessionId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Sesión de lectura cerrada. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            401: components["responses"]["Unauthenticated"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    getViewerManifest: {
-        parameters: {
-            query?: {
-                around_page?: number;
-            };
-            header?: never;
-            path: {
-                viewerSessionId: components["parameters"]["ViewerSessionId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Metadatos de lectura; nunca contiene una URL del PDF original. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["ViewerManifest"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AccessDenied"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["ViewerUnavailable"];
-        };
-    };
-    getViewerPage: {
-        parameters: {
-            query: {
-                token: string;
-            };
-            header?: never;
-            path: {
-                viewerSessionId: components["parameters"]["ViewerSessionId"];
-                pageNumber: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Imagen protegida; nunca es una variante limpia. */
-            200: {
-                headers: {
-                    "Cache-Control"?: "private, no-store";
-                    "Cross-Origin-Resource-Policy"?: "same-origin";
-                    [name: string]: unknown;
-                };
-                content: {
-                    "image/webp": string;
-                    "image/avif": string;
-                    "image/jpeg": string;
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AccessDenied"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["ViewerUnavailable"];
-            429: components["responses"]["RateLimited"];
-        };
-    };
-    adminListUsers: {
-        parameters: {
-            query?: {
-                cursor?: components["parameters"]["Cursor"];
-                page_size?: components["parameters"]["PageSize"];
-                query?: string;
-                status?: components["schemas"]["UserStatus"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Página de usuarios. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserPage"];
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-        };
-    };
-    adminCreateUser: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                /**
-                 * @example {
-                 *       "name": "Lucía Fernández",
-                 *       "email": "lucia.f@email.com",
-                 *       "access_until": "2026-08-25T23:59:59Z"
-                 *     }
-                 */
-                "application/json": components["schemas"]["CreateUserRequest"];
-            };
-        };
-        responses: {
-            /** @description Usuario creado. La contraseña inicial se muestra una sola vez. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["CreatedUser"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["ValidationError"];
-        };
-    };
-    adminGetUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Usuario encontrado. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["AdminUser"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-            404: components["responses"]["NotFound"];
-        };
-    };
-    adminUpdateUser: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUserRequest"];
-            };
-        };
-        responses: {
-            /** @description Usuario actualizado y cambio auditado. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["AdminUser"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["IdempotencyConflict"];
-            422: components["responses"]["ValidationError"];
-        };
-    };
-    adminExtendUserAccess: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
-            path: {
-                userId: components["parameters"]["UserId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                /**
-                 * @example {
-                 *       "access_until": "2026-09-25T23:59:59Z",
-                 *       "reason": "Renovación manual confirmada"
-                 *     }
-                 */
-                "application/json": {
-                    /** Format: date-time */
-                    access_until: string;
-                    reason: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Extensión transaccional con before/after auditado. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["AccessExtension"];
-                    };
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["IdempotencyConflict"];
-            422: components["responses"]["ValidationError"];
-        };
-    };
-    adminListDocuments: {
-        parameters: {
-            query?: {
-                cursor?: components["parameters"]["Cursor"];
-                page_size?: components["parameters"]["PageSize"];
-                status?: components["schemas"]["DocumentStatus"];
-                subject_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Página de documentos. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminDocumentPage"];
-                };
-            };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-        };
-    };
-    adminUploadDocument: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    title: string;
-                    subject_id: string;
-                    type: components["schemas"]["MaterialType"];
-                    /** Format: binary */
-                    file: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Archivo aceptado en cuarentena; todavía no está publicado. */
+            /** @description Solicitud aceptada. */
             202: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["AdminDocument"];
-                    };
-                };
+                content?: never;
             };
             401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
-            409: components["responses"]["IdempotencyConflict"];
-            413: components["responses"]["PayloadTooLarge"];
-            415: components["responses"]["UnsupportedMedia"];
-            422: components["responses"]["ValidationError"];
         };
     };
-    adminGetDocument: {
+    verifySellerEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenInput"];
+            };
+        };
+        responses: {
+            /** @description Correo verificado. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ValidationError"];
+        };
+    };
+    requestSellerPasswordReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailInput"];
+            };
+        };
+        responses: {
+            202: components["responses"]["AcceptedMessage"];
+            400: components["responses"]["ValidationError"];
+        };
+    };
+    resetSellerPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordInput"];
+            };
+        };
+        responses: {
+            /** @description Contraseña actualizada; sesiones anteriores inválidas. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["ValidationError"];
+        };
+    };
+    listPublicListings: {
+        parameters: {
+            query?: {
+                page_size?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Solo publicaciones publicadas. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicListingPage"];
+                };
+            };
+            400: components["responses"]["ValidationError"];
+        };
+    };
+    getPublicListing: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                documentId: components["parameters"]["DocumentId"];
+                listingId: components["parameters"]["ListingId"];
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Estado actual del documento. */
+            /** @description Ficha pública. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        data: components["schemas"]["AdminDocument"];
-                    };
+                    "application/json": components["schemas"]["PublicListingEnvelope"];
                 };
             };
-            401: components["responses"]["Unauthenticated"];
-            403: components["responses"]["AdminRequired"];
+            400: components["responses"]["ValidationError"];
             404: components["responses"]["NotFound"];
         };
     };
-    adminUpdateDocument: {
+    listMyListings: {
         parameters: {
-            query?: never;
-            header: {
-                /** @description UUID único por intención; se conserva al reintentar la misma operación. */
-                "Idempotency-Key": components["parameters"]["IdempotencyKey"];
+            query?: {
+                page_size?: components["parameters"]["PageSize"];
             };
-            path: {
-                documentId: components["parameters"]["DocumentId"];
-            };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    title?: string;
-                    type?: components["schemas"]["MaterialType"];
-                    archived?: boolean;
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description Documento actualizado. */
+            /** @description Publicaciones de la cuenta autenticada. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        data: components["schemas"]["AdminDocument"];
-                    };
+                    "application/json": components["schemas"]["PrivateListingPage"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["AccountUnavailable"];
+        };
+    };
+    getMyListing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                listingId: components["parameters"]["ListingId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Publicación privada de la cuenta autenticada. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateListingEnvelope"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["AccountUnavailable"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    getAdminListing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                listingId: components["parameters"]["ListingId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Publicación de cualquier estado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrivateListingEnvelope"];
                 };
             };
             401: components["responses"]["Unauthenticated"];
             403: components["responses"]["AdminRequired"];
             404: components["responses"]["NotFound"];
-            409: components["responses"]["IdempotencyConflict"];
-            422: components["responses"]["ValidationError"];
         };
     };
 }

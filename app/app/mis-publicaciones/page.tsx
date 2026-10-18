@@ -1,9 +1,23 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { getListingDetails, materials } from "@/lib/mock-data";
-import { Eye, MessageCircle, MoreHorizontal, Plus, Store } from "lucide-react";
+import { SellerEmailNotice } from "@/components/seller-email-notice";
+import { requireSellerSession } from "@/lib/server/seller-session";
+import { getApi } from "@/lib/server/api-runtime";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE } from "@/server/app";
+import type { MarketplacePrivateListing } from "@/lib/marketplace/gateway";
 
-export default function MyListingsPage() {
-  const ownListings = materials.slice(0, 3);
-  return <AppShell><div className="page section-page"><div className="page-title-row listings-title"><span className="page-title-icon"><Store size={24}/></span><div><div className="eyebrow">Espacio vendedor</div><h1>Mis publicaciones</h1><p className="muted">Administrá tus apuntes y revisá el interés que generan.</p></div><Link className="btn btn-primary" href="/app/publicar"><Plus size={16}/>Nueva publicación</Link></div><div className="seller-stats"><div className="card"><small>Publicaciones activas</small><strong>3</strong></div><div className="card"><small>Visitas este mes</small><strong>184</strong></div><div className="card"><small>Consultas recibidas</small><strong>12</strong></div></div><section className="card listings-table"><div className="listings-table-head"><strong>Publicación</strong><span>Rendimiento</span><span>Estado</span><span/></div>{ownListings.map((material, index) => { const listing = getListingDetails(material); return <article className="seller-listing-row" key={material.id}><div><span className="listing-mini-cover" style={{background: material.color}}>{material.title.slice(0,1)}</span><span><strong>{material.title}</strong><small>{listing.price} · {material.pages} páginas</small></span></div><span className="listing-performance"><small><Eye size={13}/>{68 - index * 13} visitas</small><small><MessageCircle size={13}/>{5 - index} consultas</small></span><span className={`status ${index === 2 ? "amber" : "green"}`}>{index === 2 ? "En revisión" : "Activa"}</span><button aria-label={`Opciones de ${material.title}`}><MoreHorizontal size={19}/></button></article>; })}</section></div></AppShell>;
+export default async function MyListingsPage() {
+  const session = await requireSellerSession("/app/mis-publicaciones");
+  const token = (await cookies()).get(SESSION_COOKIE)!.value;
+  const response = await (await getApi()).inject({ method: "GET", url: "/api/v1/me/listings", headers: { cookie: `${SESSION_COOKIE}=${token}` } });
+  const listings = response.statusCode === 200 ? (response.json() as { data: MarketplacePrivateListing[] }).data : [];
+  return <AppShell><div className="page section-page">
+    <div className="page-title-row listings-title"><div><div className="eyebrow">Espacio vendedor</div><h1>Mis publicaciones</h1><p className="muted">Tus publicaciones guardadas en EntreApuntes.</p></div><Link className="btn btn-primary" href="/app/publicar">Nueva publicación</Link></div>
+    {!session.user.email_verified && <SellerEmailNotice />}
+    <section className="card" style={{ padding: 24 }}>
+      {listings.length ? <ul>{listings.map(listing => <li key={listing.id} style={{ marginBottom: 16 }}><strong>{listing.title}</strong> · {listing.status} · {listing.price_ars ? `$${listing.price_ars}` : "Sin precio"}</li>)}</ul>
+        : <p>Todavía no tenés publicaciones. <Link href="/app/publicar">Prepará la primera</Link>.</p>}
+    </section>
+  </div></AppShell>;
 }

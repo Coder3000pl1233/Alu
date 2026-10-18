@@ -1,10 +1,11 @@
-import type { components } from "@/lib/api/generated";
 import { parseApiProblem, type ApiProblem } from "@/lib/api-errors";
+import type { components } from "@/lib/api/generated";
 
-export type LoginInput = components["schemas"]["LoginRequest"];
-export type ChangePasswordInput = components["schemas"]["ChangePasswordRequest"];
+export type LoginInput = components["schemas"]["LoginInput"];
+export type RegisterInput = components["schemas"]["RegisterInput"];
+export type ChangePasswordInput = { current_password: string; new_password: string };
 export type SessionEnvelope = components["schemas"]["SessionEnvelope"];
-export type Session = components["schemas"]["Session"];
+export type Session = SessionEnvelope["data"];
 
 type FetchLike = typeof fetch;
 
@@ -60,6 +61,11 @@ export function createApiClient(options: ApiClientOptions = {}) {
   }
 
   return {
+    register(input: RegisterInput) { return request<{ message: string }>("/auth/register", { method: "POST", body: JSON.stringify(input) }); },
+    requestVerification() { return request<void>("/auth/verification/request", { method: "POST" }); },
+    verifyEmail(token: string) { return request<void>("/auth/verify-email", { method: "POST", body: JSON.stringify({ token }) }); },
+    requestPasswordReset(email: string) { return request<{ message: string }>("/auth/password-reset/request", { method: "POST", body: JSON.stringify({ email }) }); },
+    resetPassword(token: string, password: string) { return request<void>("/auth/password-reset/confirm", { method: "POST", body: JSON.stringify({ token, password }) }); },
     login(input: LoginInput) {
       return request<SessionEnvelope>("/auth/login", {
         method: "POST",

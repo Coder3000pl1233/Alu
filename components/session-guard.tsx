@@ -3,13 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Clock3, KeyRound, LockKeyhole, ShieldX } from "lucide-react";
-import { MockSessionGuard } from "@/components/mock-session-guard";
-import { createAuthGateway, getAuthMode, problemFromAuthError } from "@/lib/auth-gateway";
+import { createAuthGateway, problemFromAuthError } from "@/lib/auth-gateway";
 import { apiErrorCodeToView, apiProblemToView } from "@/lib/api-errors";
 import type { Session } from "@/lib/api/client";
 
 export function SessionGuard({ children }: { children: React.ReactNode }) {
-  if (getAuthMode() === "demo") return <MockSessionGuard>{children}</MockSessionGuard>;
   return <ApiSessionGuard>{children}</ApiSessionGuard>;
 }
 
@@ -50,7 +48,7 @@ function ApiSessionGuard({ children }: { children: React.ReactNode }) {
     <Link className="btn btn-primary" href="/login?step=change-password">Continuar</Link>
   </main>;
 
-  if (session.user.access_state !== "active" && session.user.access_state !== "expiring") {
+  if (session.user.access_state !== "active") {
     const view = apiErrorCodeToView(session.user.access_state === "expired" ? "ACCESS_EXPIRED" : session.user.access_state === "suspended" ? "ACCOUNT_SUSPENDED" : "ACCOUNT_REVOKED");
     return <main className="session-gate danger"><span className="session-gate-icon"><ShieldX size={29}/></span><h1>{view.title}</h1><p>{view.message}</p></main>;
   }

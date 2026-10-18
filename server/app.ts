@@ -7,6 +7,9 @@ import { IdentityError, type IdentityService } from "@/lib/identity/identity-ser
 import { AuthorizationError, authorizeContent, requireAdmin } from "@/lib/security/authorization";
 import { SessionError, type SessionService } from "@/lib/sessions/session-service";
 import { DocumentUploadError, type DocumentUploadService } from "@/lib/documents/upload-service";
+import { MarketplaceAccessError, type MarketplaceListingService } from "@/lib/marketplace/listing-service";
+import { SellerAccountError, type SellerAccountService } from "@/lib/identity/seller-account-service";
+import { PasswordPolicyError } from "@/lib/security/passwords";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -21,6 +24,8 @@ export type ApiDependencies = {
   identity: IdentityOperations;
   sessions: SessionOperations;
   documents?: Pick<DocumentUploadService, "upload">;
+  marketplace?: MarketplaceListingService;
+  sellerAccounts?: SellerAccountService;
 };
 
 export const SESSION_COOKIE = "__Host-aula_session";
@@ -36,6 +41,7 @@ const problemTitles: Record<string, string> = {
   RATE_LIMITED: "Demasiados intentos",
   VALIDATION_FAILED: "Revisá los datos ingresados",
   RESOURCE_NOT_FOUND: "No encontramos este recurso",
+  TOKEN_INVALID: "El enlace no es válido o venció",
   PAYLOAD_TOO_LARGE: "El archivo supera el límite permitido",
   UNSUPPORTED_MEDIA_TYPE: "El formato del archivo no es válido",
 };
@@ -79,10 +85,22 @@ export function buildApi(dependencies: ApiDependencies) {
   });
 
   app.setErrorHandler((error, request, reply) => {
-    if (error instanceof IdentityError || error instanceof AuthorizationError || error instanceof SessionError || error instanceof DocumentUploadError) {
+    if (error && typeof error === "object" && "validation" in error && error.validation) {
+      return reply.status(400).type("application/problem+json").send({
+        type: "about:blank",
+        title: problemTitles.VALIDATION_FAILED,
+        status: 400,
+        code: "VALIDATION_FAILED",
+        request_id: request.id,
+      });
+    }
+    if (error instanceof PasswordPolicyError) {
+      return reply.status(400).type("application/problem+json").send({ type: "about:blank", title: "La contraseña debe tener 12 caracteres, mayúscula, minúscula, número y símbolo", status: 400, code: "VALIDATION_FAILED", request_id: request.id });
+    }
+    if (error instanceof IdentityError || error instanceof AuthorizationError || error instanceof SessionError || error instanceof DocumentUploadError || error instanceof MarketplaceAccessError || error instanceof SellerAccountError) {
       const status = error instanceof DocumentUploadError ? error.code === "PAYLOAD_TOO_LARGE" ? 413 : error.code === "UNSUPPORTED_MEDIA_TYPE" ? 415 : 422 : error.status;
       return reply.status(status).type("application/problem+json").send({
-        type: `https://api.aula.test/problems/${error.code.toLowerCase().replaceAll("_", "-")}`,
+        type: "about:blank",
         title: problemTitles[error.code] ?? "No pudimos completar la operación",
         status,
         code: error.code,
@@ -91,7 +109,7 @@ export function buildApi(dependencies: ApiDependencies) {
     }
     request.log.error({ err: error, request_id: request.id }, "request_failed");
     return reply.status(500).type("application/problem+json").send({
-      type: "https://api.aula.test/problems/internal-error",
+      type: "about:blank",
       title: "No pudimos completar la operación",
       status: 500,
       code: "INTERNAL_ERROR",
@@ -130,6 +148,41 @@ export function buildApi(dependencies: ApiDependencies) {
     return reply.status(204).send();
   });
 
+  if (dependencies.sellerAccounts) {
+    const accounts = dependencies.sellerAccounts;
+    const emailSchema = { type: "string", format: "email", maxLength: 254 } as const;
+    app.post<{ Body: { name: string; email: string; password: string } }>("/api/v1/auth/register", {
+      schema: { body: { type: "object", required: ["name", "email", "password"], additionalProperties: false,
+        properties: { name: { type: "string", minLength: 2, maxLength: 120 }, email: emailSchema, password: { type: "string", minLength: 1, maxLength: 128 } } } },
+    }, async (request, reply) => {
+      await accounts.register(request.body);
+      return reply.status(202).send({ message: "Si la cuenta puede crearse, recibirás un correo para verificarla." });
+    });
+    app.post<{ Body: { email: string } }>("/api/v1/auth/password-reset/request", {
+      schema: { body: { type: "object", required: ["email"], additionalProperties: false, properties: { email: emailSchema } } },
+    }, async (request, reply) => {
+      await accounts.requestReset(request.body.email);
+      return reply.status(202).send({ message: "Si existe una cuenta, recibirás un enlace para restablecerla." });
+    });
+    app.post<{ Body: { token: string; password: string } }>("/api/v1/auth/password-reset/confirm", {
+      schema: { body: { type: "object", required: ["token", "password"], additionalProperties: false,
+        properties: { token: { type: "string", minLength: 1, maxLength: 256 }, password: { type: "string", minLength: 1, maxLength: 128 } } } },
+    }, async (request, reply) => {
+      await accounts.resetPassword(request.body.token, request.body.password);
+      return reply.status(204).send();
+    });
+    app.post<{ Body: { token: string } }>("/api/v1/auth/verify-email", {
+      schema: { body: { type: "object", required: ["token"], additionalProperties: false, properties: { token: { type: "string", minLength: 1, maxLength: 256 } } } },
+    }, async (request, reply) => {
+      await accounts.verify(request.body.token);
+      return reply.status(204).send();
+    });
+    app.post("/api/v1/auth/verification/request", { preHandler: async request => { request.authUser = await authenticateRequest(request); } }, async (request, reply) => {
+      await accounts.requestVerification(request.authUser!);
+      return reply.status(202).send();
+    });
+  }
+
   app.post<{ Body: { current_password: string; new_password: string } }>("/api/v1/auth/password", async (request, reply) => {
     const token = request.cookies[SESSION_COOKIE];
     const current = await dependencies.sessions.resolve(token);
@@ -142,6 +195,35 @@ export function buildApi(dependencies: ApiDependencies) {
   });
 
   const adminOnly = adminAuthorizationHook(authenticateRequest);
+
+  if (dependencies.marketplace) {
+    const marketplace = dependencies.marketplace;
+    const listingIdSchema = { type: "object", required: ["listingId"], properties: { listingId: { type: "string", format: "uuid" } } } as const;
+    const pageQuerySchema = { type: "object", properties: { page_size: { type: "integer", minimum: 1, maximum: 50, default: 24 } }, additionalProperties: false } as const;
+    const marketplaceAuthenticated: preHandlerHookHandler = async (request) => {
+      request.authUser = await authenticateRequest(request);
+    };
+
+    app.get<{ Querystring: { page_size?: number } }>("/api/v1/listings", { schema: { querystring: pageQuerySchema } }, async (request) => ({
+      data: await marketplace.listPublic(request.query.page_size),
+    }));
+
+    app.get<{ Params: { listingId: string } }>("/api/v1/listings/:listingId", { schema: { params: listingIdSchema } }, async (request) => ({
+      data: await marketplace.getPublic(request.params.listingId),
+    }));
+
+    app.get<{ Querystring: { page_size?: number } }>("/api/v1/me/listings", { preHandler: marketplaceAuthenticated, schema: { querystring: pageQuerySchema } }, async (request) => ({
+      data: await marketplace.listMine(request.authUser, request.query.page_size),
+    }));
+
+    app.get<{ Params: { listingId: string } }>("/api/v1/me/listings/:listingId", { preHandler: marketplaceAuthenticated, schema: { params: listingIdSchema } }, async (request) => ({
+      data: await marketplace.getMine(request.authUser, request.params.listingId),
+    }));
+
+    app.get<{ Params: { listingId: string } }>("/api/v1/admin/listings/:listingId", { preHandler: marketplaceAuthenticated, schema: { params: listingIdSchema } }, async (request) => ({
+      data: await marketplace.getForAdmin(request.authUser, request.params.listingId),
+    }));
+  }
 
   app.post("/api/v1/admin/documents", { preHandler: adminOnly }, async (request, reply) => {
     if (!dependencies.documents) throw new Error("document_upload_not_configured");

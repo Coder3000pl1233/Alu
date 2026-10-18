@@ -47,6 +47,7 @@ const safeUser = (user: User) => {
     email: user.email,
     role: user.role,
     status: user.status,
+    emailVerifiedAt: user.emailVerifiedAt,
     accessUntil: user.accessUntil,
     mustChangePassword: user.mustChangePassword,
     sessionVersion: user.sessionVersion,

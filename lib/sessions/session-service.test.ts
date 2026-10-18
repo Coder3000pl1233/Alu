@@ -13,6 +13,7 @@ const user: User = {
   email: "lucia@aula.test",
   role: "student",
   status: "active",
+  emailVerifiedAt: null,
   accessUntil: new Date("2026-09-01T00:00:00Z"),
   passwordHash: "hash",
   mustChangePassword: false,

@@ -97,6 +97,7 @@ export class SessionService {
         email: record.user.email,
         role: record.user.role,
         status: record.user.status,
+        email_verified: Boolean(record.user.emailVerifiedAt),
         access_state: accessState,
         access_until: record.user.accessUntil?.toISOString() ?? null,
         must_change_password: record.user.mustChangePassword,

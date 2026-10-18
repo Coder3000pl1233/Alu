@@ -72,7 +72,8 @@ export function PublishListingForm() {
         </div>
       </section>
 
-      <div className="publish-actions"><a className="btn btn-secondary" href="/app">Cancelar</a><button className="btn btn-primary" disabled={!fileName || checking}>Continuar con la publicación</button></div>
+      <p className="muted">El guardado de borradores y el envío a revisión se conectarán en el punto 02. Este formulario todavía no guarda datos.</p>
+      <div className="publish-actions"><a className="btn btn-secondary" href="/app">Volver</a><button className="btn btn-primary" disabled>Guardar borrador (próximamente)</button></div>
     </form>
   );
 }

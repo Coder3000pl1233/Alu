@@ -63,6 +63,7 @@ function makeUser(input: Partial<User> & Pick<User, "id">): User {
     email: input.email ?? "estudiante@aula.test",
     role: input.role ?? "student",
     status: input.status ?? "active",
+    emailVerifiedAt: input.emailVerifiedAt ?? null,
     accessUntil: input.accessUntil === undefined ? new Date("2026-09-01T00:00:00Z") : input.accessUntil,
     passwordHash: input.passwordHash ?? "hash",
     mustChangePassword: input.mustChangePassword ?? true,
@@ -114,7 +115,7 @@ describe("identity service", () => {
   it("solo un administrador crea usuarios y la clave inicial nunca se persiste en claro", async () => {
     const { service, store, student, admin } = setup();
     const input = { name: "Nueva Alumna", email: "nueva@aula.test", accessUntil: new Date("2026-10-01T00:00:00Z"), requestId: REQUEST_ID };
-    await expect(service.createUser(student, input)).rejects.toMatchObject({ code: "ADMIN_REQUIRED" });
+    await expect(service.createUser({ ...student, accessUntil: new Date("2099-01-01T00:00:00Z") }, input)).rejects.toMatchObject({ code: "ADMIN_REQUIRED" });
     const result = await service.createUser(admin, input);
     const stored = store.users.find((user) => user.id === result.user.id)!;
     expect(result.initialPassword).toBeTruthy();

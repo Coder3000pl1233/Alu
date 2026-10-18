@@ -1,8 +1,6 @@
-# Base de datos P0
+# Base de datos de EntreApuntes
 
-El esquema se define en `lib/db/schema.ts` y las migraciones versionadas se guardan en `drizzle/`.
-
-## Comandos
+El esquema se define en `lib/db/schema.ts` y las migraciones versionadas están en `drizzle/`. La migración `0004` añade el marketplace; `0005` añade la verificación de correo y los tokens de un solo uso para recuperación. Las tablas de biblioteca por suscripción permanecen temporalmente mientras se reemplazan las pantallas heredadas.
 
 ```powershell
 npm.cmd run db:generate
@@ -10,8 +8,8 @@ npm.cmd run db:check
 npm.cmd run db:migrate
 ```
 
-- `db:generate` crea una migración al cambiar el esquema.
-- `db:check` valida el historial de migraciones sin conectarse a una base.
-- `db:migrate` aplica migraciones usando `DATABASE_URL`; no debe ejecutarse contra producción sin revisar antes el SQL generado y contar con backup.
+Revisar la migración generada antes de aplicarla. En el entorno local, PostgreSQL 18 escucha en `localhost:5432` y la base `aula_segura` pertenece al usuario `aula`; la URL está en `.env.local` (ignorado por Git). Para ejecutar `db:migrate` en otra sesión de PowerShell, definir `DATABASE_URL` en esa sesión o usar el valor predeterminado de `drizzle.config.ts`. No ejecutar migraciones contra producción sin copia de seguridad y plan de recuperación.
 
-La migración inicial crea `users`. Solo persiste `password_hash`: una contraseña inicial podrá generarse y mostrarse una vez, pero nunca se guardará como texto ni en un campo temporal.
+La prueba `lib/marketplace/postgres-integration.test.ts` comprueba la lectura persistida y el filtro público cuando `DATABASE_URL` está definida. Crea datos temporales y los elimina al terminar.
+
+La prueba `lib/identity/seller-account-integration.test.ts` comprueba registro, verificación, sesión, recuperación y revocación de sesiones anteriores. En desarrollo, los enlaces de correo se guardan en `.local-mailbox.jsonl` y se leen desde `http://localhost:3000/dev/correos`; ambos quedan fuera de Git. Esta bandeja no se habilita en producción.
